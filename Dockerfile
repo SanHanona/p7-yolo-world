@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3-dev \
     python3-wheel \
+    -qqy x11-apps \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,13 +37,19 @@ RUN pip3 install --upgrade pip wheel \
         onnxsim \
     && mim install mmcv==2.1.0 \
     && mim install mmdet==3.3.0 \
-    && pip3 install --no-cache-dir git+https://github.com/onuralpszr/mmyolo.git
+    && pip3 install --no-cache-dir git+https://github.com/onuralpszr/mmyolo.git \
+    && pip install -q inference-gpu[yolo-world]==0.9.12rc1 
+
 
 # Clone and install YOLO-World
 FROM python_deps AS yolo_world
 
-RUN git clone --recursive https://github.com/AILab-CVC/YOLO-World /yolo/
+# RUN git clone --recursive https://github.com/AILab-CVC/YOLO-World /yolo/
+# RUN git clone --recursive https://github.com/tim-win/YOLO-World /yolo/
+
 WORKDIR /yolo
+
+COPY . /yolo
 
 RUN pip3 install -e .[demo]
 
@@ -57,7 +64,7 @@ RUN mkdir /weights/ \
     && chmod a+rwx /yolo/configs/*/*
 
 # Optionally download weights (commented out by default)
-# RUN curl -o /weights/$WEIGHT -L https://huggingface.co/wondervictor/YOLO-World/resolve/main/$WEIGHT
+RUN curl -o /weights/$WEIGHT -L https://huggingface.co/wondervictor/YOLO-World/resolve/main/$WEIGHT
 
 # Set the default command
 CMD ["bash"]
