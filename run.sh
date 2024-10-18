@@ -79,23 +79,9 @@ if [[ $model_key == seg-* ]]; then
     demo_file="demo/segmentation_demo.py"
 fi
 
-
 # Allow Docker containers to connect to X server
 # xhost +local:root
 echo "Running Docker container..."
-# docker run -it \
-#     --privileged \
-#     --env DISPLAY=$DISPLAY \
-#     --net="host" \ 
-#     --runtime nvidia \
-#     -v "$(readlink -f "$MODEL_DIR"):/weights/" \
-#     -p 8080:8080 \
-#     "yolo-demo:latest" \
-    
-    # python3 "$demo_file" "$config_dir/$MODEL" "/weights/$WEIGHT"
-    # --device /dev/video0:/dev/video0 \
-    # -v "/tmp/.X11-unix:/tmp/.X11-unix" \
-    #--env="QT_X11_NO_MITSHM=1" \\
 
-docker run --rm -it --privileged --net=host --runtime nvidia --volume /tmp/.X11-unix:/tmp/.X11-unix --volume $HOME/.Xauthority:/root/.Xauthority:rw --env DISPLAY=$DISPLAY --device /dev/video0:/dev/video0 -p 8080:8080 yolo-demo:latest
+docker run --rm -it --privileged --net=host --runtime nvidia --gpus all -p 8080:8080 yolo-demo:latest
 
