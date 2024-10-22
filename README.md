@@ -26,12 +26,13 @@ You can run the Docker container in different modes based on your operating syst
 To run the Docker container, use:
 ```bash
 ./run_headless.sh pretrain-l-clip
-`
+```
 
 ## Inside the Container
 
 Once inside the container, navigate to the `demo/` directory and execute various YOLO test examples using Python 3:
-```bash
+```
+bash
 cd demo/
 python3 yolo_test.py
 ```
