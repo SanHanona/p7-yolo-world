@@ -18,12 +18,6 @@ Run the following command in your terminal:
 ./build.sh pretrain-l-clip
 ```
 
-### Windows
-Execute the following command in your command prompt:
-```bash
-./build.bat pretrain-l-clip
-```
-
 ## Running the Docker Container
 
 You can run the Docker container in different modes based on your operating system:
@@ -31,24 +25,14 @@ You can run the Docker container in different modes based on your operating syst
 ### Linux
 To run the Docker container, use:
 ```bash
-./run.sh pretrain-l-clip
-```
-For a headless mode, run:
-```bash
 ./run_headless.sh pretrain-l-clip
-```
-
-### Windows
-To run the Docker container, execute:
-```bat
-./run_headless.bat pretrain-l-clip
-```
+`
 
 ## Inside the Container
 
 Once inside the container, navigate to the `demo/` directory and execute various YOLO test examples using Python 3:
 ```bash
 cd demo/
-python3 yolo_test_*.py
+python3 yolo_test.py
 ```
 
