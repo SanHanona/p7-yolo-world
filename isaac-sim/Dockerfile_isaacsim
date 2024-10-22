@@ -1,0 +1,83 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Reference:
+# https://gitlab.com/nvidia/container-images/vulkan/-/blob/master/docker/Dockerfile.ubuntu
+# https://github.com/NVIDIA-Omniverse/IsaacSim-dockerfiles
+#
+# Build the image:
+# docker login nvcr.io
+# docker build --pull -t \
+#   isaac-sim:2023.1.0-ubuntu22.04 \
+#   --build-arg ISAACSIM_VERSION=2023.1.0 \
+#   --file Dockerfile.2023.1.0-ubuntu22.04 .
+#
+# Run container:
+# docker run --name isaac-sim --entrypoint bash -it --gpus all -e "ACCEPT_EULA=Y" --rm --network=host \
+#   -e "PRIVACY_CONSENT=Y" -e "PRIVACY_USERID=<email>" \
+#   -v ~/docker/isaac-sim/cache/kit:/isaac-sim/kit/cache:rw \
+#   -v ~/docker/isaac-sim/cache/ov:/root/.cache/ov:rw \
+#   -v ~/docker/isaac-sim/cache/pip:/root/.cache/pip:rw \
+#   -v ~/docker/isaac-sim/cache/glcache:/root/.cache/nvidia/GLCache:rw \
+#   -v ~/docker/isaac-sim/cache/computecache:/root/.nv/ComputeCache:rw \
+#   -v ~/docker/isaac-sim/logs:/root/.nvidia-omniverse/logs:rw \
+#   -v ~/docker/isaac-sim/data:/root/.local/share/ov/data:rw \
+#   -v ~/docker/isaac-sim/documents:/root/Documents:rw \
+# 	isaac-sim:2023.1.0-ubuntu22.04 \
+# 	./isaac-sim.headless.native.sh --allow-root
+#
+# More info:
+# https://developer.nvidia.com/isaac-sim
+#
+ARG DEBIAN_FRONTEND=noninteractive
+ARG ISAACSIM_VERSION=2023.1.0
+
+# https://catalog.ngc.nvidia.com/orgs/nvidia/containers/isaac-sim
+FROM nvcr.io/nvidia/isaac-sim:${ISAACSIM_VERSION} as isaac-sim
+
+# ENV OMNI_SERVER http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/2023.1.0
+# ENV OMNI_SERVER omniverse://localhost/NVIDIA/Assets/Isaac/2023.1.0
+# ENV OMNI_USER admin
+# ENV OMNI_PASS admin
+ENV MIN_DRIVER_VERSION 525.60.11
+
+WORKDIR /isaac-sim
+
+# Add symlink
+RUN ln -s exts/omni.isaac.examples/omni/isaac/examples extension_examples
+
+# Install ROS 2 Humble dependencies
+RUN apt-get update && apt-get install -y \
+    curl gnupg2 lsb-release software-properties-common
+
+# Add the ROS 2 apt repository
+RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - && \
+    add-apt-repository universe && \
+    add-apt-repository restricted && \
+    add-apt-repository multiverse && \
+    sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
+
+# Install ROS 2 Humble
+RUN apt-get update && apt-get install -y \
+    ros-humble-desktop \
+    python3-colcon-common-extensions \
+    python3-rosdep2
+
+# Source ROS 2 setup script and initialize rosdep
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc && \
+    rosdep init && \
+    rosdep update
+
+# Default entrypoint to launch headless with streaming and ROS 2 sourced
+ENTRYPOINT /bin/bash -c "source /opt/ros/humble/setup.bash && /isaac-sim/runheadless.native.sh"
