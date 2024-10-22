@@ -6,7 +6,7 @@ ENV FORCE_CUDA="1" \
     MMCV_WITH_OPS=1 \
     DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# Install system dependencies including prerequisites for ROS2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     libgl1-mesa-glx \
@@ -19,7 +19,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-wheel \
     -qqy x11-apps \
     curl \
+    lsb-release \
+    gnupg2 \
     && rm -rf /var/lib/apt/lists/*
+
+# Add ROS2 Humble apt repository
+RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - \
+    && sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
+
+# Install ROS2 Humble
+RUN apt-get update && apt-get install -y \
+    ros-humble-desktop \
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    && rosdep init \
+    && rosdep update \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up ROS2 environment variables
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
 # Install Python dependencies
 FROM base AS python_deps
@@ -40,12 +58,8 @@ RUN pip3 install --upgrade pip wheel \
     && pip3 install --no-cache-dir git+https://github.com/onuralpszr/mmyolo.git \
     && pip install -q inference-gpu[yolo-world]==0.9.12rc1 
 
-
 # Clone and install YOLO-World
 FROM python_deps AS yolo_world
-
-# RUN git clone --recursive https://github.com/AILab-CVC/YOLO-World /yolo/
-# RUN git clone --recursive https://github.com/tim-win/YOLO-World /yolo/
 
 WORKDIR /yolo
 
