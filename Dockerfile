@@ -27,8 +27,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     locales \
     build-essential \
-    python3-colcon-common-extensions \
-    python3-vcstool \
     git \
     && locale-gen en_US en_US.UTF-8 \
     && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
@@ -42,8 +40,9 @@ RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt
 # Install ROS2 Humble
 RUN apt-get update && apt-get install -y \
     ros-humble-desktop \
-    python3-colcon-common-extensions \
     python3-rosdep \
+    python3-colcon-common-extensions \
+    python3-vcstool \
     python3-argcomplete \
     && rosdep init \
     && rosdep update \
