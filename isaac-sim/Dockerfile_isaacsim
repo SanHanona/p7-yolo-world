@@ -40,7 +40,6 @@
 # More info:
 # https://developer.nvidia.com/isaac-sim
 #
-ARG DEBIAN_FRONTEND=noninteractive
 ARG ISAACSIM_VERSION=2023.1.0
 
 # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/isaac-sim
@@ -51,6 +50,7 @@ FROM nvcr.io/nvidia/isaac-sim:${ISAACSIM_VERSION} as isaac-sim
 # ENV OMNI_USER admin
 # ENV OMNI_PASS admin
 ENV MIN_DRIVER_VERSION 525.60.11
+ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
@@ -61,18 +61,12 @@ RUN ln -s exts/omni.isaac.examples/omni/isaac/examples extension_examples
 
 # Install essential packages and dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3-pip \
-    libgl1-mesa-glx \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libglib2.0-0 \
-    -qqy x11-apps \
-    curl \
-    lsb-release \
-    gnupg2 \
     locales \
+    curl \
+    gnupg2 \
+    lsb-release \
     build-essential \
+    python3-pip \
     git \
     && locale-gen en_US en_US.UTF-8 \
     && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
