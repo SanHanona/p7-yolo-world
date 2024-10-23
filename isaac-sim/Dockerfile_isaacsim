@@ -60,13 +60,19 @@ WORKDIR /isaac-sim
 RUN ln -s exts/omni.isaac.examples/omni/isaac/examples extension_examples
 
 # Install essential packages and dependencies
-RUN apt-get update && apt-get install -y \
-    locales \
-    curl \
-    gnupg2 \
-    lsb-release \
-    build-essential \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
+    libgl1-mesa-glx \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libglib2.0-0 \
+    -qqy x11-apps \
+    curl \
+    lsb-release \
+    gnupg2 \
+    locales \
+    build-essential \
     git \
     && locale-gen en_US en_US.UTF-8 \
     && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
