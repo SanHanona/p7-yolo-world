@@ -4,7 +4,11 @@ FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS base
 # Set environment variables
 ENV FORCE_CUDA="1" \
     MMCV_WITH_OPS=1 \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+WORKDIR /yolo
 
 # Install system dependencies including prerequisites for ROS2
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -21,7 +25,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     lsb-release \
     gnupg2 \
+    locales \
+    build-essential \
+    python3-colcon-common-extensions \
+    python3-vcstool \
+    git \
+    && locale-gen en_US en_US.UTF-8 \
+    && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Add ROS2 Humble apt repository
 RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - \
@@ -32,11 +44,13 @@ RUN apt-get update && apt-get install -y \
     ros-humble-desktop \
     python3-colcon-common-extensions \
     python3-rosdep \
+    python3-argcomplete \
     && rosdep init \
     && rosdep update \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up ROS2 environment variables
+SHELL ["/bin/bash", "-c"]
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
 # Install Python dependencies
@@ -61,8 +75,6 @@ RUN pip3 install --upgrade pip wheel \
 # Clone and install YOLO-World
 FROM python_deps AS yolo_world
 
-WORKDIR /yolo
-
 COPY . /yolo
 
 RUN pip3 install -e .[demo]
@@ -81,4 +93,5 @@ RUN mkdir /weights/ \
 RUN curl -o /weights/$WEIGHT -L https://huggingface.co/wondervictor/YOLO-World/resolve/main/$WEIGHT
 
 # Set the default command
-CMD ["bash"]
+# Set the entrypoint to source ROS 2 automatically
+ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && exec \"$@\""]
