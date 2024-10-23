@@ -72,7 +72,8 @@ RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt
 RUN apt-get update && apt-get install -y \
     ros-humble-desktop \
     python3-colcon-common-extensions \
-    python3-rosdep2
+    python3-rosdep2 \ 
+    libopenh264-dev 
 
 # Source ROS 2 setup script and initialize rosdep
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc && \
