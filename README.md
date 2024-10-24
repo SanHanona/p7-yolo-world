@@ -1,34 +1,73 @@
-# p7-yolo-world
+# p7-yolo-world + isaac sim container 
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
+- **Nvidia driver**: Version 560.35.03 has proven to work with this repo 
 - **CUDA 12.1**: [Download CUDA 12.1](https://developer.nvidia.com/cuda-12-1-0-download-archive)
 - **Nvidia Container Toolkit** (Linux only): Follow [this guide](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_container.html#container-setup) (see step 3).
-- **Nvidia Runtime for Docker** (Windows only): Refer to [this Stack Overflow thread](https://stackoverflow.com/questions/77323535/add-nvidia-runtime-to-docker-runtimes-on-windows-wsl) for instructions.
+- **Nvidia omniverse streaming client**: https://docs.omniverse.nvidia.com/launcher/latest/it-managed-launcher/install_guide_linux.html 
+
 
 ## Build Instructions
 
-To build the Docker image, follow the instructions for your operating system:
+To build the Docker image
 
-### Linux
+### Build YOLO-World
 Run the following command in your terminal:
 ```bash
-./build.sh pretrain-l-clip
+./build_isaac.sh pretrain-l-clip
 ```
 
-## Running the Docker Container
-
-You can run the Docker container in different modes based on your operating system:
-
-### Linux
-To run the Docker container, use:
+### Build Isaac-sim 
+Navigate to isaac_sim folder 
 ```bash
-./run_headless.sh pretrain-l-clip
+cd isaac-sim
 ```
+Run the following to build 
+```bash
+./build.sh
+```
+
+You will be prompted to give a username and password 
+```bash
+usernam: $oauthtoken
+Pass: ask or create a account and key: https://docs.nvidia.com/ngc/gpu-cloud/ngc-user-guide/index.html#generating-api-key 
+```
+
+## Run with docker-compose 
+
+You can run the Docker containers with docker compose 
+
+Navigate to docker-compose
+```bash
+cd docker-compose
+```
+
+Run both containers in detached mode (running in the background)
+```bash
+docker compose up -d
+```
+
+### Verify container
+Verify the containers are runnning: 
+```bash
+docker compose ps
+```
+
+You should see both containers running 
 
 ## Inside the Container
+
+### Isaac-sim 
+The Isaac-sim container executes a runheadless script. You should be able to access the stream through the streaming client using the ip of the host. 
+
+### YOLO-World
+Access the container with: 
+```bash
+docker exec -it yolo-demo /bin/bash
+```
 
 Once inside the container, navigate to the `demo/` directory and execute various YOLO test examples using Python 3:
 ```bash
@@ -36,3 +75,13 @@ cd demo/
 python3 yolo_test.py
 ```
 
+# ROS2 
+Both containers have ros2 humble install and should be able to communicate. For trouble-shooting ros2 issues test the containers can communicate. First access both containers in two different terminals. 
+
+Run a listener and talker 
+```bash
+ros2 run demo_nodes_py talker
+```
+```bash
+ros2 run demo_nodes_py listener
+```
