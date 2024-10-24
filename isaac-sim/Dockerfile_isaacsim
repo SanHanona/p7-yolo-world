@@ -40,7 +40,8 @@
 # More info:
 # https://developer.nvidia.com/isaac-sim
 #
-ARG ISAACSIM_VERSION=2023.1.0
+ARG DEBIAN_FRONTEND=noninteractive
+ARG ISAACSIM_VERSION=4.2.0
 
 # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/isaac-sim
 FROM nvcr.io/nvidia/isaac-sim:${ISAACSIM_VERSION} as isaac-sim
@@ -49,7 +50,7 @@ FROM nvcr.io/nvidia/isaac-sim:${ISAACSIM_VERSION} as isaac-sim
 # ENV OMNI_SERVER omniverse://localhost/NVIDIA/Assets/Isaac/2023.1.0
 # ENV OMNI_USER admin
 # ENV OMNI_PASS admin
-ENV MIN_DRIVER_VERSION 525.60.11
+ENV MIN_DRIVER_VERSION=525.60.11
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
@@ -68,6 +69,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3-pip \
     git \
+    libopenh264-dev \
     && locale-gen en_US en_US.UTF-8 \
     && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
@@ -95,4 +97,4 @@ RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 # WORKDIR /root/ros2_ws
 
 # Set the entrypoint to source ROS 2 automatically
-ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && exec \"$@\""]
+# ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && exec \"$@\""]

@@ -92,4 +92,4 @@ RUN curl -o /weights/$WEIGHT -L https://huggingface.co/wondervictor/YOLO-World/r
 
 # Set the default command
 # Set the entrypoint to source ROS 2 automatically
-ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && exec \"$@\""]
+# ENTRYPOINT ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && exec \"$@\""]

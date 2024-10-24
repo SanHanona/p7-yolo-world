@@ -17,7 +17,11 @@ fi
 
 # Build the Docker image using Dockerfile_isaacsim
 echo "Building Docker image from Dockerfile_isaacsim..."
-docker build -t isaac-sim:custom-build -f Dockerfile_isaacsim .
+# docker build --pull -t \
+#   nvcr.io/nvidia/isaac-sim:4.2.0  \
+#   --build-arg ISAACSIM_VERSION=4.2.0 \
+#   --file Dockerfile_isaacsim .
+docker build -t isaac-sim:custom-build --build-arg ISAACSIM_VERSION=4.2.0 -f Dockerfile_isaacsim .
 
 # Check if build was successful
 if [ $? -eq 0 ]; then
