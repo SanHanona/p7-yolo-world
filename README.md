@@ -17,7 +17,7 @@ To build the Docker image
 ### Build YOLO-World
 Run the following command in your terminal:
 ```bash
-./build_isaac.sh pretrain-l-clip
+./build.sh pretrain-l-clip
 ```
 
 ### Build Isaac-sim 
