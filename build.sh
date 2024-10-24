@@ -81,7 +81,7 @@ fi
 
 # Build Docker image and run container
 echo "Building Docker image..."
-docker build -f ./Dockerfile --no-cache \
+docker build -f ./Dockerfile \
     --build-arg="MODEL=$MODEL" \
     --build-arg="WEIGHT=$WEIGHT" \
     -t "yolo-demo:latest" .

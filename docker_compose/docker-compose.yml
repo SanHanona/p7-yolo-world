@@ -8,15 +8,19 @@ services:
     privileged: true
     environment:
       - DISPLAY=${DISPLAY}
-    # devices:
-    #   - /dev/video0:/dev/video0
+    devices:
+      - /dev/video0:/dev/video0
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ${HOME}/.Xauthority:/root/.Xauthority:rw
+      - /dev/shm:/dev/shm
     ports:
       - "8080:8080"
     network_mode: host
-    # command: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && roslaunch my_yolo_demo_package start.launch"]
+    command: tail -f /dev/null  # Keep the container running
+
+    # command: ["/bin/bash"]
+    #"-c", "source /opt/ros/humble/setup.bash && roslaunch my_yolo_demo_package start.launch"]
     # # Add any start command you need here, the above command is just an example.
 
   isaac-sim:
@@ -36,9 +40,11 @@ services:
       - ~/docker/isaac-sim/logs:/root/.nvidia-omniverse/logs:rw
       - ~/docker/isaac-sim/data:/root/.local/share/ov/data:rw
       - ~/docker/isaac-sim/documents:/root/Documents:rw
+      - /dev/shm:/dev/shm
     ports:
       - "47995:47995"
     network_mode: host
-    command: ["/bin/bash", "-c", "./isaac-sim.headless.native.sh --allow-root"]
+    # command: tail -f /dev/null  # Keep the container running
+    command: ["/bin/bash", "-c", "./runheadless.native.sh --allow-root"]
     # Modify this start command as needed for Isaac Sim.
 
