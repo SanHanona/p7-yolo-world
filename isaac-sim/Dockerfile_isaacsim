@@ -89,6 +89,19 @@ RUN apt-get update && apt-get install -y \
     && rosdep init && rosdep update \
     && rm -rf /var/lib/apt/lists/*
 
+# Install additional ROS 2 tools and Isaac Sim ROS 2 packages
+RUN apt-get update && apt-get install -y \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
+    ros-humble-rviz2 \
+    ros-humble-tf2-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the RMW_IMPLEMENTATION environment variable to Fast DDS
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
 # Source the ROS 2 setup script
 SHELL ["/bin/bash", "-c"]
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
