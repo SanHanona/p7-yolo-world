@@ -8,6 +8,7 @@ services:
     privileged: true
     environment:
       - DISPLAY=${DISPLAY}
+      # - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
     devices:
       - /dev/video0:/dev/video0
     volumes:
@@ -18,9 +19,7 @@ services:
       - "8080:8080"
     network_mode: host
     command: tail -f /dev/null  # Keep the container running
-
     # command: ["/bin/bash"]
-    #"-c", "source /opt/ros/humble/setup.bash && roslaunch my_yolo_demo_package start.launch"]
     # # Add any start command you need here, the above command is just an example.
 
   isaac-sim:
@@ -31,6 +30,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - PRIVACY_CONSENT=Y
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
     volumes:
       - ~/docker/isaac-sim/cache/kit:/isaac-sim/kit/cache:rw
       - ~/docker/isaac-sim/cache/ov:/root/.cache/ov:rw
@@ -44,7 +44,5 @@ services:
     ports:
       - "47995:47995"
     network_mode: host
-    # command: tail -f /dev/null  # Keep the container running
-    command: ["/bin/bash", "-c", "./runheadless.native.sh --allow-root"]
+    entrypoint: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && ./runheadless.native.sh"]
     # Modify this start command as needed for Isaac Sim.
-
