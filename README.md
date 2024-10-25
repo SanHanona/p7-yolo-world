@@ -123,6 +123,11 @@ source ros_ws/install/setup.bash
 ros2 launch nav_goal_handler nav_goal_handler.launch.py
 ```
 
+- Run image subscriber to see yolo detections - new terminal same container 
+```bash
+ros2 run P7 JohnsFunciton 
+```
+
 ### debug
 Run a listener and talker 
 ```bash
