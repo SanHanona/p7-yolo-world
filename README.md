@@ -38,6 +38,15 @@ Pass: ask or create a account and key: https://docs.nvidia.com/ngc/gpu-cloud/ngc
 
 ## Run with docker-compose 
 
+Running the **container on local machine** you will need to give permission to X server before running the container: 
+```bash
+xhost +local:root
+```
+Running the **container from a host** e.g. ssh you might need to run from the host: 
+```bash
+xhost +local:docker
+```
+
 You can run the Docker containers with docker compose 
 
 Navigate to docker-compose
