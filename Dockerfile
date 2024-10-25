@@ -87,7 +87,7 @@ COPY . /yolo
 RUN pip3 install -e .[demo]
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-ENV FASTRTPS_DEFAULT_PROFILES_FILE=humble_ws/fastdds.xml
+ENV FASTRTPS_DEFAULT_PROFILES_FILE=ros_ws/fastdds.xml
 
 # Set up ROS2 environment variables
 SHELL ["/bin/bash", "-c"]
