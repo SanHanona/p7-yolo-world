@@ -28,6 +28,7 @@ services:
     runtime: nvidia
     privileged: true
     environment:
+      - DISPLAY=${DISPLAY}
       - ACCEPT_EULA=Y
       - PRIVACY_CONSENT=Y
       - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
@@ -40,6 +41,8 @@ services:
       - ~/docker/isaac-sim/logs:/root/.nvidia-omniverse/logs:rw
       - ~/docker/isaac-sim/data:/root/.local/share/ov/data:rw
       - ~/docker/isaac-sim/documents:/root/Documents:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.Xauthority:/root/.Xauthority:rw
       - /dev/shm:/dev/shm
     ports:
       - "47995:47995"

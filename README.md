@@ -78,6 +78,43 @@ python3 yolo_test.py
 # ROS2 
 Both containers have ros2 humble install and should be able to communicate. For trouble-shooting ros2 issues test the containers can communicate. First access both containers in two different terminals. 
 
+## navigation demo 
+To run the navigation with rvis: 
+- open the streaming client 
+-> Isaac Examples --> ROS2 --> Navigation --> Carter Navigation
+-> press play
+
+- In a terminal exec the isaac sim container
+```bash
+docker exec -it isaac-sim /bin/bash
+```
+
+- Source the installs 
+```bash
+source humble_ws/install/setup.bash
+```
+
+- Run rviz and all that 
+```bash
+ros2 launch carter_navigation carter_navigation.launch.py
+```
+
+- In a new terminal exec the yolo world 
+```bash
+docker exec -it yolo-demo /bin/bash
+```
+
+- Source the installs 
+```bash
+source ros_ws/install/setup.bash
+```
+
+- Run navigation and all that 
+```bash
+ros2 launch nav_goal_handler nav_goal_handler.launch.py
+```
+
+### debug
 Run a listener and talker 
 ```bash
 ros2 run demo_nodes_py talker
@@ -85,3 +122,5 @@ ros2 run demo_nodes_py talker
 ```bash
 ros2 run demo_nodes_py listener
 ```
+
+

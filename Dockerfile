@@ -40,6 +40,9 @@ RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt
 RUN apt-get update && apt-get install -y \
     ros-humble-desktop \
     python3-rosdep \
+    python3-rosinstall \
+    python3-rosinstall-generator \
+    python3-wstool \
     python3-colcon-common-extensions \
     python3-vcstool \
     python3-argcomplete \
@@ -47,11 +50,15 @@ RUN apt-get update && apt-get install -y \
     && rosdep update \
     && rm -rf /var/lib/apt/lists/*
 
-# Set up ROS2 environment variables
-SHELL ["/bin/bash", "-c"]
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
-
-ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+# Install additional ROS 2 tools and Isaac Sim ROS 2 packages
+RUN apt-get update && apt-get install -y \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
+    ros-humble-rviz2 \
+    ros-humble-tf2-tools \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 FROM base AS python_deps
@@ -78,6 +85,21 @@ FROM python_deps AS yolo_world
 COPY . /yolo
 
 RUN pip3 install -e .[demo]
+
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ENV FASTRTPS_DEFAULT_PROFILES_FILE=humble_ws/fastdds.xml
+
+# Set up ROS2 environment variables
+SHELL ["/bin/bash", "-c"]
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+RUN cd ros_ws && \
+    apt-get update && apt-get install -y && \
+    rosdep update && \
+    rosdep install -i --from-path src --rosdistro humble -y && \
+    source /opt/ros/humble/setup.bash && \
+    colcon build && \
+    source install/local_setup.bash
 
 # Final stage
 FROM yolo_world AS final
