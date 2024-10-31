@@ -49,15 +49,12 @@ xhost +local:docker
 
 You can run the Docker containers with docker compose 
 
-Navigate to docker-compose
+Run both containers in detached mode as dev container (running in the background)
 ```bash
-cd docker-compose
+docker compose -f docker-compose-dev up -d
 ```
 
-Run both containers in detached mode (running in the background)
-```bash
-docker compose up -d
-```
+The isaac-sim dev container only mounts the isaac-sim/humble_ws folder 
 
 ### Verify container
 Verify the containers are runnning: 
@@ -75,7 +72,7 @@ The Isaac-sim container executes a runheadless script. You should be able to acc
 ### YOLO-World
 Access the container with: 
 ```bash
-docker exec -it yolo-demo /bin/bash
+docker exec -it yolo-demo-dev /bin/bash
 ```
 
 Once inside the container, navigate to the `demo/` directory and execute various YOLO test examples using Python 3:
@@ -95,7 +92,7 @@ To run the navigation with rvis:
 
 - In a terminal exec the isaac sim container
 ```bash
-docker exec -it isaac-sim /bin/bash
+docker exec -it isaac-sim-dev /bin/bash
 ```
 
 - Source the installs 
