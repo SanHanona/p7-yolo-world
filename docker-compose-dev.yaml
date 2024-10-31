@@ -3,11 +3,12 @@ version: '3.8'
 services:
   yolo-demo:
     image: yolo-demo:latest
-    container_name: yolo-demo
+    container_name: yolo-demo-dev
     runtime: nvidia
     privileged: true
     environment:
       - DISPLAY=${DISPLAY}
+      # Uncomment this if required
       # - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
     devices:
       - /dev/video0:/dev/video0
@@ -15,8 +16,10 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ${HOME}/.Xauthority:/root/.Xauthority:rw
       - /dev/shm:/dev/shm
+      - .:/yolo  # Mount the local codebase to /app in the container
     ports:
       - "8080:8080"
+      - "9229:9229"  # Additional port for debugging, if needed
     network_mode: host
     command: tail -f /dev/null  # Keep the container running
     # command: ["/bin/bash"]
@@ -24,7 +27,7 @@ services:
 
   isaac-sim:
     image: isaac-sim:custom-build
-    container_name: isaac-sim
+    container_name: isaac-sim-dev
     runtime: nvidia
     privileged: true
     environment:
@@ -44,8 +47,10 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ${HOME}/.Xauthority:/root/.Xauthority:rw
       - /dev/shm:/dev/shm
+      - ./isaac-sim/humble_ws:/isaac-sim/humble_ws  # Mount your codebase to /workspace
     ports:
       - "47995:47995"
+      - "8000:8000"  # Additional port for dev/debug server
     network_mode: host
     entrypoint: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && ./runheadless.native.sh"]
     # Modify this start command as needed for Isaac Sim.
