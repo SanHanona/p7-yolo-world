@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  yolo-demo:
+    image: yolo-demo:latest
+    container_name: yolo-demo
+    runtime: nvidia
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      # - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+    devices:
+      - /dev/video0:/dev/video0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.Xauthority:/root/.Xauthority:rw
+      - /dev/shm:/dev/shm
+    ports:
+      - "8080:8080"
+    network_mode: host
+    command: tail -f /dev/null  # Keep the container running
+    # command: ["/bin/bash"]
+    # # Add any start command you need here, the above command is just an example.
+
+  isaac-sim:
+    image: isaac-sim:custom-build
+    container_name: isaac-sim
+    runtime: nvidia
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - ACCEPT_EULA=Y
+      - PRIVACY_CONSENT=Y
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+    volumes:
+      - ~/docker/isaac-sim/cache/kit:/isaac-sim/kit/cache:rw
+      - ~/docker/isaac-sim/cache/ov:/root/.cache/ov:rw
+      - ~/docker/isaac-sim/cache/pip:/root/.cache/pip:rw
+      - ~/docker/isaac-sim/cache/glcache:/root/.cache/nvidia/GLCache:rw
+      - ~/docker/isaac-sim/cache/computecache:/root/.nv/ComputeCache:rw
+      - ~/docker/isaac-sim/logs:/root/.nvidia-omniverse/logs:rw
+      - ~/docker/isaac-sim/data:/root/.local/share/ov/data:rw
+      - ~/docker/isaac-sim/documents:/root/Documents:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.Xauthority:/root/.Xauthority:rw
+      - /dev/shm:/dev/shm
+    ports:
+      - "47995:47995"
+    network_mode: host
+    entrypoint: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && ./runheadless.native.sh"]
+    # Modify this start command as needed for Isaac Sim.
