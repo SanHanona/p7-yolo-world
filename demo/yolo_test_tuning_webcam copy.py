@@ -9,7 +9,6 @@ from inference.models.yolo_world.yolo_world import YOLOWorld
 import string
 import nltk
 from nltk import word_tokenize, pos_tag
-
 import ssl
 
 try:
@@ -18,6 +17,8 @@ except AttributeError:
     pass
 else:
     ssl._create_default_https_context = _create_unverified_https_context
+
+nltk.download()
 
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
@@ -43,11 +44,14 @@ def extract_noun_phrases(text):
 BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
 
+SOURCE_VIDEO_PATH = f"data/slow_traffic_small.mp4"
+video_capture = cv2.VideoCapture(SOURCE_VIDEO_PATH)
 
-model = YOLOWorld(model_id="yolo_world/s") #can be l, m, s (large, medium, small)
-# classes = ['hand']
+model = YOLOWorld(model_id="yolo_world/l")
 
-classes = extract_noun_phrases('man with blue')
+# classes = ["chair","table","shelf","person"]
+
+classes = extract_noun_phrases('person with hat')
 model.set_classes(classes)
 
 cap = cv2.VideoCapture(0)
