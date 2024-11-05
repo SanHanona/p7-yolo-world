@@ -1,0 +1,35 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from isaac_ros2_messages/srv/GetPrimAttribute.srv
+// generated code does not contain a copyright notice
+
+
+module isaac_ros2_messages {
+  module srv {
+    struct GetPrimAttribute_Request {
+      @verbatim (language="comment", text=
+        "prim path")
+      string path;
+
+      @verbatim (language="comment", text=
+        "attribute name")
+      string attribute;
+    };
+    struct GetPrimAttribute_Response {
+      @verbatim (language="comment", text=
+        "attribute value (as JSON)")
+      string value;
+
+      @verbatim (language="comment", text=
+        "attribute type")
+      string type;
+
+      @verbatim (language="comment", text=
+        "indicate a successful execution of the service")
+      boolean success;
+
+      @verbatim (language="comment", text=
+        "informational, e.g. for error messages")
+      string message;
+    };
+  };
+};

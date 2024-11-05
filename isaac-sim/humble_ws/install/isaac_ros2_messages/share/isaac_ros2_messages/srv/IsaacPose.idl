@@ -1,0 +1,27 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from isaac_ros2_messages/srv/IsaacPose.srv
+// generated code does not contain a copyright notice
+
+#include "geometry_msgs/msg/Pose.idl"
+#include "geometry_msgs/msg/Twist.idl"
+#include "geometry_msgs/msg/Vector3.idl"
+#include "std_msgs/msg/Header.idl"
+
+module isaac_ros2_messages {
+  module srv {
+    struct IsaacPose_Request {
+      std_msgs::msg::Header header;
+
+      sequence<string> names;
+
+      sequence<geometry_msgs::msg::Pose> poses;
+
+      sequence<geometry_msgs::msg::Twist> velocities;
+
+      sequence<geometry_msgs::msg::Vector3> scales;
+    };
+    struct IsaacPose_Response {
+      uint8 structure_needs_at_least_one_member;
+    };
+  };
+};
