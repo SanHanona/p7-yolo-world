@@ -1,0 +1,35 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from isaac_ros2_messages/srv/GetPrimAttributes.srv
+// generated code does not contain a copyright notice
+
+
+module isaac_ros2_messages {
+  module srv {
+    struct GetPrimAttributes_Request {
+      @verbatim (language="comment", text=
+        "prim path")
+      string path;
+    };
+    struct GetPrimAttributes_Response {
+      @verbatim (language="comment", text=
+        "list of attribute base names (name used to Get or Set an attribute)")
+      sequence<string> names;
+
+      @verbatim (language="comment", text=
+        "list of attribute display names (name displayed in Property tab)")
+      sequence<string> displays;
+
+      @verbatim (language="comment", text=
+        "list of attribute data types")
+      sequence<string> types;
+
+      @verbatim (language="comment", text=
+        "indicate a successful execution of the service")
+      boolean success;
+
+      @verbatim (language="comment", text=
+        "informational, e.g. for error messages")
+      string message;
+    };
+  };
+};

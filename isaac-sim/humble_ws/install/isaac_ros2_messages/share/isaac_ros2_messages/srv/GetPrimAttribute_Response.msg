@@ -1,0 +1,5 @@
+
+string value            # attribute value (as JSON)
+string type             # attribute type
+bool success            # indicate a successful execution of the service
+string message          # informational, e.g. for error messages

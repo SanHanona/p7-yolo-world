@@ -10,9 +10,9 @@ BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
 
 # model = YOLOWorld(model_id="yolo_world/s") #can be l, m, s (large, medium, small)
-model = YOLOWorld("../runs/detect/train2/weights/last.pt") #can be l, m, s (large, medium, small)
+model = YOLOWorld("../configs/finetune_handguestures/runs/detect/train3/weights/last.pt")
 
-classes = ["human"]
+classes = ["Up","Down","Right","Left","Stop","Thumbs up","Thumbs Down"]
 model.set_classes(classes)
 
 cap = cv2.VideoCapture(0)
@@ -27,8 +27,9 @@ while True:
     if not ret:
         break
 
-    results = model.infer(frame, confidence=0.002)
-    detections = sv.Detections.from_inference(results).with_nms(threshold=0.1)
+    results = model.predict(frame, conf=0.3, iou=0.3) #conf=0.25, iou=0.45
+    # print(results)
+    detections = sv.Detections.from_ultralytics(results[0]).with_nms(threshold=0.3)
 
     annotated_image = frame.copy()
     annotated_image = BOUNDING_BOX_ANNOTATOR.annotate(annotated_image, detections)

@@ -1,0 +1,31 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from isaac_ros2_messages/srv/GetPrims.srv
+// generated code does not contain a copyright notice
+
+
+module isaac_ros2_messages {
+  module srv {
+    struct GetPrims_Request {
+      @verbatim (language="comment", text=
+        "get prims at path")
+      string path;
+    };
+    struct GetPrims_Response {
+      @verbatim (language="comment", text=
+        "list of prim paths")
+      sequence<string> paths;
+
+      @verbatim (language="comment", text=
+        "prim type names")
+      sequence<string> types;
+
+      @verbatim (language="comment", text=
+        "indicate a successful execution of the service")
+      boolean success;
+
+      @verbatim (language="comment", text=
+        "informational, e.g. for error messages")
+      string message;
+    };
+  };
+};
