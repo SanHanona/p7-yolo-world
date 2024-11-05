@@ -44,6 +44,12 @@ def extract_noun_phrases(text):
 BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
 
+<<<<<<< HEAD
+=======
+SOURCE_VIDEO_PATH = f"data/slow_traffic_small.mp4"
+video_capture = cv2.VideoCapture(SOURCE_VIDEO_PATH)
+
+>>>>>>> origin/fine_tune_hand_guestures
 model = YOLOWorld(model_id="yolo_world/l")
 
 # classes = ["chair","table","shelf","person"]

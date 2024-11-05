@@ -1,0 +1,5 @@
+train: /yolo/configs/finetune_handguestures/hand_gestures_v6i.yolov5pytorch/train/images
+val: /yolo/configs/finetune_handguestures/hand_gestures_v6i.yolov5pytorch/valid/images
+
+nc: 7
+names: ['Down', 'Left', 'Right', 'Stop', 'Thumbs Down', 'Thumbs up', 'Up']
