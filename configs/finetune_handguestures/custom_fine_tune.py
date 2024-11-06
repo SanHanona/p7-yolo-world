@@ -9,16 +9,17 @@ custom_imports = dict(
 num_classes = 7
 num_training_classes = 7
 max_epochs = 5 # Maximum training epochs
-close_mosaic_epochs = 10
+close_mosaic_epochs = 1
 save_epoch_intervals = 5
+
 text_channels = 512
 neck_embed_channels = [128, 256, _base_.last_stage_out_channels // 2]
 neck_num_heads = [4, 8, _base_.last_stage_out_channels // 2 // 32]
 base_lr = 2e-4
-weight_decay = 0.001
-train_batch_size_per_gpu = 16
+weight_decay = 0.05
+train_batch_size_per_gpu = 8
 load_from = '../../../weights/yolo_world_v2_l_clip_large_o365v1_goldg_pretrain-8ff2e744.pth'
-text_model_name = '../pretrained_models/clip-vit-base-patch32-projection'
+# text_model_name = '../pretrained_models/clip-vit-base-patch32-projection'
 text_model_name = 'openai/clip-vit-base-patch32'
 persistent_workers = False
 
@@ -95,11 +96,13 @@ train_pipeline_stage2 = [
     *_base_.train_pipeline_stage2[:-1],
     *text_transform
 ]
+metainfo = dict(classes=('0', '1', '2', '3', '4', '5', '6'))
 coco_train_dataset = dict(
     _delete_=True,
     type='MultiModalDataset',
     dataset=dict(
         type='YOLOv5CocoDataset',
+        metainfo = metainfo,
         data_root='../data/hand_gestures_v6i.yolov5pytorch',
         ann_file='coco.json',
         data_prefix=dict(img='train/images/'),
@@ -115,8 +118,7 @@ train_dataloader = dict(
 test_pipeline = [
     *_base_.test_pipeline[:-1],
     dict(type='LoadText'),
-    dict(
-        type='mmdet.PackDetInputs',
+    dict(type='mmdet.PackDetInputs',
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
                    'scale_factor', 'pad_param', 'texts'))
 ]
@@ -126,13 +128,18 @@ coco_val_dataset = dict(
     dataset=dict(
         type='YOLOv5CocoDataset',
         data_root='../data/hand_gestures_v6i.yolov5pytorch',
+        metainfo = metainfo, 
+        test_mode = True,
         ann_file='coco_valid.json',
         data_prefix=dict(img='valid/images/'),
-        filter_cfg=dict(filter_empty_gt=False, min_size=32)),
+        batch_shapes_cfg = None),
+        # filter_cfg=dict(filter_empty_gt=False, min_size=32)),
     class_text_path='../data/hand_gestures_v6i.yolov5pytorch/data.json',
     pipeline=test_pipeline)
 val_dataloader = dict(dataset=coco_val_dataset)
+
 test_dataloader = val_dataloader
+
 # training settings
 default_hooks = dict(
     param_scheduler=dict(
@@ -141,7 +148,7 @@ default_hooks = dict(
         max_epochs=max_epochs),
     checkpoint=dict(
         max_keep_ckpts=-1,
-        save_best=None,
+        save_best='auto',
         interval=save_epoch_intervals))
 custom_hooks = [
     dict(
@@ -172,10 +179,12 @@ optim_wrapper = dict(
         custom_keys={'backbone.text_model': dict(lr_mult=0.01),
                      'logit_scale': dict(weight_decay=0.0)}),
     constructor='YOLOWv5OptimizerConstructor')
+
 # evaluation settings
 val_evaluator = dict(
-    _delete_=True,
+    # _delete_=True,
     type='mmdet.CocoMetric',
-    proposal_nums=(100, 1, 10),
+    # proposal_nums=(100, 1, 10),
     ann_file='../data/hand_gestures_v6i.yolov5pytorch/coco_valid.json',
     metric='bbox')
+test_evaluator = val_evaluator
