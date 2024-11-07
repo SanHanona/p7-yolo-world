@@ -50,10 +50,10 @@ model = YOLOWorld(model_id="yolo_world/s")
 # classes = ["chair","table","shelf","person"]
 
 # classes = extract_noun_phrases('car')
-classes = ["cars", "person"]
+classes = ["car", "person"]
 model.set_classes(classes)
 
-# Define video capture and check if it's opened successfully
+## Define video capture and check if it's opened successfully
 if not video_capture.isOpened():
     print("Error: Could not open video.")
 else:
@@ -62,9 +62,9 @@ else:
     frame_height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(video_capture.get(cv2.CAP_PROP_FPS))
     
-    # Define the codec and create a VideoWriter object
-    output_filename = 'annotated_video.avi'
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    # Define the codec and create a VideoWriter object for MP4 output
+    output_filename = 'data/annotated_video.mp4'
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4
     out = cv2.VideoWriter(output_filename, fourcc, fps, (frame_width, frame_height))
 
     while True:
@@ -73,8 +73,8 @@ else:
             break
 
         # Perform inference and annotate frame
-        results = model.infer(frame, confidence=0.2)
-        detections = sv.Detections.from_inference(results).with_nms(threshold=0.85)
+        results = model.infer(frame, confidence=0.1)
+        detections = sv.Detections.from_inference(results).with_nms(threshold=0.1)
 
         annotated_image = frame.copy()
         annotated_image = BOUNDING_BOX_ANNOTATOR.annotate(annotated_image, detections)
@@ -89,4 +89,5 @@ else:
     cv2.destroyAllWindows()
 
     print(f"Video saved as {output_filename}")
+
 
