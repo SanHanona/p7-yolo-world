@@ -9,7 +9,7 @@ LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=s
 
 model = YOLOWorld(model_id="yolo_world/s") #can be l, m, s (large, medium, small)
 
-classes = ["human"]
+classes = ["person"]
 model.set_classes(classes)
 
 cap = cv2.VideoCapture(0)
@@ -24,16 +24,10 @@ while True:
     if not ret:
         break
 
-<<<<<<< HEAD
-    results = model.infer(frame, confidence=0.002)
-=======
-<<<<<<< HEAD
-    results = model.infer(frame, confidence=0.002, )
-=======
-    results = model.infer(frame, confidence=0.002)
->>>>>>> origin/fine_tune_hand_guestures
->>>>>>> db6c6324138a7ba00265d32bf682105d983d09ab
-    detections = sv.Detections.from_inference(results).with_nms(threshold=0.1)
+
+    results = model.infer(frame, confidence=0.5)
+
+    detections = sv.Detections.from_inference(results).with_nms(threshold=0.5)
 
     annotated_image = frame.copy()
     annotated_image = BOUNDING_BOX_ANNOTATOR.annotate(annotated_image, detections)
