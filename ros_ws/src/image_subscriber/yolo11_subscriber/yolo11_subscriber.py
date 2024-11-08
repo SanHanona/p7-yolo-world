@@ -98,9 +98,11 @@ class MinimalSubscriber(Node):
 
                 depth_rect = cv2.putText(depth_rect, str(round(obj_depth,2)) + "m", (x[0]+5,y[1]-5), cv2.FONT_HERSHEY_SIMPLEX, 
                     1, (255,0,0), 2, cv2.LINE_AA)
-                depth_rect = cv2.circle(depth_rect, (obj_x+20,obj_y), 2, (255,0,255), 2)
+                depth_rect = cv2.circle(depth_rect, (obj_x,obj_y), 2, (255,0,255), 2)
 
                 object_loc = self.locate_object(obj_x, obj_depth)
+
+                self.handle_obj_tf(object_loc, id)
                 
                 print(object_loc)
         else:
@@ -131,17 +133,16 @@ class MinimalSubscriber(Node):
         X = ((obj_x-cx)*Z)/480
         # Y = ((obj_y-cy)*Z)/self.camera['fLeng']
 
-        self.handle_obj_tf([X,0.0,Z])
-
         return [X,0.0,Z]
 
-    def handle_obj_tf(self, loc):
+    def handle_obj_tf(self, loc, name):
         # grabbed from https://docs.ros.org/en/rolling/Tutorials/Intermediate/Tf2/Writing-A-Tf2-Broadcaster-Py.html
         t = TransformStamped()
 
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = 'base_link'
-        t.child_frame_id = 'object_link'
+        child_name = 'object_link_' + str(name)
+        t.child_frame_id = child_name
 
         t.transform.translation.x = float(loc[2])
         t.transform.translation.y = float(-loc[0])
@@ -154,28 +155,6 @@ class MinimalSubscriber(Node):
 
         self.tf_broadcaster.sendTransform(t)
 
-    def quaternion_from_euler(ai, aj, ak):
-        ai /= 2.0
-        aj /= 2.0
-        ak /= 2.0
-        ci = np.cos(ai)
-        si = np.sin(ai)
-        cj = np.cos(aj)
-        sj = np.sin(aj)
-        ck = np.cos(ak)
-        sk = np.sin(ak)
-        cc = ci*ck
-        cs = ci*sk
-        sc = si*ck
-        ss = si*sk
-
-        q = np.empty((4, ))
-        q[0] = cj*sc - sj*cs
-        q[1] = cj*ss + sj*cc
-        q[2] = cj*cs - sj*sc
-        q[3] = cj*cc + sj*ss
-
-        return q
 
 def main(args=None):
     rclpy.init(args=args)
