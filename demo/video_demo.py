@@ -5,6 +5,7 @@ import argparse
 import cv2
 import mmcv
 import torch
+import sys
 from mmengine.dataset import Compose
 from mmdet.apis import init_detector
 from mmengine.utils import track_iter_progress
@@ -14,14 +15,18 @@ from mmyolo.registry import VISUALIZERS
 
 def parse_args():
     parser = argparse.ArgumentParser(description='YOLO-World video demo')
-    parser.add_argument('config', help='Config file')
-    parser.add_argument('checkpoint', help='Checkpoint file')
-    parser.add_argument('video', help='video file path')
-    parser.add_argument(
-        'text',
-        help=
-        'text prompts, including categories separated by a comma or a txt file with each line as a prompt.'
-    )
+    parser.add_argument('--config', 
+                        default='../configs/finetune_coco/yolo_world_v2_l_vlpan_bn_sgd_1e-3_40e_8gpus_finetune_coco.py',
+                        help='Config file')
+    parser.add_argument('--checkpoint', 
+                        default='../../weights/yolo_world_v2_l_vlpan_bn_sgd_1e-3_40e_8gpus_finetune_coco_ep80-e1288152.pth',
+                        help='Checkpoint file')
+    parser.add_argument('--video', 
+                        default='data/slow_traffic_small.mp4',
+                        help='video file path')
+    parser.add_argument('--text',
+                        type=str,
+                        help='text prompts, including categories separated by a comma or a txt file with each line as a prompt.')
     parser.add_argument('--device',
                         default='cuda:0',
                         help='device used for inference')
@@ -82,8 +87,10 @@ def main():
         video_writer = cv2.VideoWriter(
             args.out, fourcc, video_reader.fps,
             (video_reader.width, video_reader.height))
+        
+    frames = [frame for frame in video_reader]
 
-    for frame in track_iter_progress(video_reader):
+    for frame in track_iter_progress(frames, file=sys.stdout):
         result = inference_detector(model,
                                     frame,
                                     texts,
