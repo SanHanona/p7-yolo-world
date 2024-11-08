@@ -85,12 +85,12 @@ coco_train_dataset = dict(_delete_=True,
                           type='MultiModalDataset',
                           dataset=dict(
                               type='YOLOv5CocoDataset',
-                              data_root='data/coco',
+                              data_root='../data/coco',
                               ann_file='annotations/instances_train2017.json',
                               data_prefix=dict(img='train2017/'),
                               filter_cfg=dict(filter_empty_gt=False,
                                               min_size=32)),
-                          class_text_path='data/texts/coco_class_texts.json',
+                          class_text_path='../data/texts/coco_class_texts.json',
                           pipeline=train_pipeline)
 
 train_dataloader = dict(persistent_workers=persistent_workers,
@@ -108,11 +108,11 @@ coco_val_dataset = dict(
     _delete_=True,
     type='MultiModalDataset',
     dataset=dict(type='YOLOv5CocoDataset',
-                 data_root='data/coco',
+                 data_root='../data/coco',
                  ann_file='annotations/instances_val2017.json',
                  data_prefix=dict(img='val2017/'),
                  filter_cfg=dict(filter_empty_gt=False, min_size=32)),
-    class_text_path='data/texts/coco_class_texts.json',
+    class_text_path='../data/texts/coco_class_texts.json',
     pipeline=test_pipeline)
 val_dataloader = dict(dataset=coco_val_dataset)
 test_dataloader = val_dataloader

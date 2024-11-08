@@ -36,8 +36,8 @@ def inference(model, image, texts, test_pipeline, score_thr=0.3, max_dets=100):
 
 if __name__ == "__main__":
 
-    config_file = "configs/pretrain/yolo_world_v2_x_vlpan_bn_2e-3_100e_4x8gpus_obj365v1_goldg_train_1280ft_lvis_minival.py"
-    checkpoint = "weights/yolo_world_v2_x_obj365v1_goldg_cc3mlite_pretrain_1280ft-14996a36.pth"
+    config_file = "../configs/finetune_handguestures/custom_fine_tune_2.py"
+    checkpoint = "../tools/work_dirs/custom_fine_tune_2/epoch_15.pth"
 
     cfg = Config.fromfile(config_file)
     cfg.work_dir = osp.join('./work_dirs')
@@ -48,8 +48,8 @@ if __name__ == "__main__":
     test_pipeline_cfg[0].type = 'mmdet.LoadImageFromNDArray'
     test_pipeline = Compose(test_pipeline_cfg)
 
-    texts = [['person'], ['bus'], [' ']]
-    image = "demo/sample_images/bus.jpg"
+    texts = [['person'], ['bus']]
+    image = "sample_images/bus.jpg"
     print(f"starting to detect: {image}")
     results = inference(model, image, texts, test_pipeline)
     format_str = [

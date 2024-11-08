@@ -50,7 +50,7 @@ model = YOLOWorld(model_id="yolo_world/s")
 # classes = ["chair","table","shelf","person"]
 
 # classes = extract_noun_phrases('car')
-classes = ["cars", "person"]
+classes = ["car", "person"]
 model.set_classes(classes)
 
 if not video_capture.isOpened():
