@@ -120,3 +120,4 @@ while True:
 #print("average framerate", avg_fps)
 cap.release()
 cv2.destroyAllWindows()
+''

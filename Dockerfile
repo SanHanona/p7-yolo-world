@@ -104,8 +104,9 @@ RUN cd ros_ws && \
 # Final stage
 FROM yolo_world AS final
 
-ARG MODEL="yolo_world_l_dual_vlpan_l2norm_2e-3_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py"
-ARG WEIGHT="yolo_world_l_clip_base_dual_vlpan_2e-3adamw_32xb16_100e_o365_goldg_train_pretrained-0e566235.pth"
+# ARG MODEL="yolo_world_l_dual_vlpan_l2norm_2e-3_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py"
+ARG MODEL = "yolo_world_v2_l_clip_large_vlpan_bn_2e-3_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py yolo_world_v2_l_clip_large_o365v1_goldg_pretrain-8ff2e744.pth"
+ARG WEIGHT="-3adamw_32xb16_100e_o365_goldg_train_pretrained-0e566235.pth"
 
 # Create weights directory and set permissions
 RUN mkdir /weights/ \

@@ -1,0 +1,8 @@
+source;share/video_subscriber/hook/cmake_prefix_path.ps1
+source;share/video_subscriber/hook/cmake_prefix_path.dsv
+source;share/video_subscriber/hook/cmake_prefix_path.sh
+source;share/video_subscriber/local_setup.bash
+source;share/video_subscriber/local_setup.dsv
+source;share/video_subscriber/local_setup.ps1
+source;share/video_subscriber/local_setup.sh
+source;share/video_subscriber/local_setup.zsh
