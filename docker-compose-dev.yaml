@@ -9,7 +9,7 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
       # Uncomment this if required
-      # - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
     devices:
       - /dev/video0:/dev/video0
     volumes:
@@ -53,4 +53,24 @@ services:
       - "8000:8000"  # Additional port for dev/debug server
     network_mode: host
     entrypoint: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && ./runheadless.native.sh"]
+    # Modify this start command as needed for Isaac Sim.
+
+  llama:
+    image: llama:latest
+    container_name: llama-dev
+    runtime: nvidia
+    privileged: true
+    environment:
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - PULSE_SERVER=unix:/tmp/pulse_socket
+    devices:
+      - /dev/video0:/dev/video0
+    volumes:
+      - /dev/shm:/dev/shm
+      - /tmp/pulse_socket:/tmp/pulse_socket:ro 
+      - .:/llama
+    ports:
+      - "8080:8080"
+    network_mode: host
+    command: tail -f /dev/null
     # Modify this start command as needed for Isaac Sim.

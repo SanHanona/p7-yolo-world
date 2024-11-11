@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     libopenh264-dev \
     ffmpeg \
+    portaudio19-dev \
     && locale-gen en_US en_US.UTF-8 \
     && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
@@ -71,24 +72,27 @@ FROM ros AS python_deps
 
 COPY . .
 
-RUN pip3 install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121 \
-    && pip3 install --no-cache-dir \
+RUN pip3 install --upgrade pip wheel \
+    && pip3 install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121 \
+    && pip3 install \
         # llama-models \
-        # blobfile \
-        # fairscale \
-        # fire \
-        # jinja2\
-        # json-strong-typing \
-        # tiktoken \ 
+        blobfile \
+        whisper \
+        fairscale \
+        fire \
+        jinja2\
+        json-strong-typing \
+        tiktoken \ 
         pydantic \
         pydantic_core \
         Pillow \
         PyYAML \
-        setuptools 
-        # pyaudio \
-        # SpeechRecognition \
-        # --extra-index-url https://download.pytorch.org/whl/cu121 \
-        # numpy 
+        setuptools \
+        pyaudio \
+        paramiko \
+        SpeechRecognition \
+        --extra-index-url https://download.pytorch.org/whl/cu121 \
+        numpy==1.26.4 
         #git+https://github.com/openai/whisper.git
 
 FROM python_deps AS llama
@@ -103,7 +107,7 @@ ENV FASTRTPS_DEFAULT_PROFILES_FILE=llama_ws/fastdds.xml
 SHELL ["/bin/bash", "-c"]
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
-RUN cd llama_ws && \
+RUN cd llama_ws && ls && \
     apt-get update && apt-get install -y && \
     rosdep update && \
     rosdep install -i --from-path src --rosdistro humble -y && \
