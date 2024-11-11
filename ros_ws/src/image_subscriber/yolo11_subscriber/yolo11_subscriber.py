@@ -19,6 +19,8 @@ from inference.models.yolo_world.yolo_world import YOLOWorld
 BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
 
+# New branch BABY!
+
 model = YOLO("yolo11s.pt")
 
 class MinimalSubscriber(Node):
