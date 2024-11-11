@@ -2,7 +2,7 @@
 
 # since this file is sourced use either the provided AMENT_CURRENT_PREFIX
 # or fall back to the destination set at configure time
-: ${AMENT_CURRENT_PREFIX:="/home/emil/personal/Project/P7/GitHub/p7-yolo-world/ros_ws/install/video_subscriber"}
+: ${AMENT_CURRENT_PREFIX:="/yolo/ros_ws/install/video_subscriber"}
 if [ ! -d "$AMENT_CURRENT_PREFIX" ]; then
   if [ -z "$COLCON_CURRENT_PREFIX" ]; then
     echo "The compile time prefix path '$AMENT_CURRENT_PREFIX' doesn't " \

@@ -9,7 +9,7 @@ LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=s
 
 model = YOLOWorld(model_id="yolo_world/s") #can be l, m, s (large, medium, small)
 
-classes = ["person"]
+classes = ["human"]
 model.set_classes(classes)
 
 cap = cv2.VideoCapture(0)

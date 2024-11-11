@@ -1,6 +1,8 @@
+import os
+from glob import glob
 from setuptools import find_packages, setup
 
-package_name = 'P7'
+package_name = 'vision'
 
 setup(
     name=package_name,
@@ -10,19 +12,19 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*')))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='aaulab',
-    maintainer_email='aaulab@todo.todo',
+    maintainer_email='jonas.thorhauge@gmail.com',
     description='TODO: Package description',
     license='Apache-2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-
-            # 'JohnsFunciton = image_subscriber.image_subscriber:main', 
-            # 'yolo11_subscriber = yolo11_subscriber.yolo11_subscriber:main'
+            'JohnsFunciton = vision.image_subscriber:main', 
+            'yolo11_subscriber = vision.yolo11_subscriber:main'
         ],
     },
 )
