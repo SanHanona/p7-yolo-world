@@ -82,7 +82,11 @@ RUN pip3 install --upgrade pip wheel \
 # Clone and install YOLO-World
 FROM python_deps AS yolo_world
 
-COPY . /yolo
+# experimental - exlude llama folder
+COPY [^l]*   
+COPY l[^l]* /yolo   
+
+# COPY . /yolo
 
 RUN pip3 install -e .[demo]
 
