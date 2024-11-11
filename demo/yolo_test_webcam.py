@@ -24,10 +24,9 @@ while True:
     if not ret:
         break
 
+    results = model.infer(frame, confidence=0.002)
 
-    results = model.infer(frame, confidence=0.5)
-
-    detections = sv.Detections.from_inference(results).with_nms(threshold=0.5)
+    detections = sv.Detections.from_inference(results).with_nms(threshold=0.1)
 
     annotated_image = frame.copy()
     annotated_image = BOUNDING_BOX_ANNOTATOR.annotate(annotated_image, detections)

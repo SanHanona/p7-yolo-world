@@ -24,7 +24,6 @@ setup(
         'console_scripts': [
             'JohnsFunciton = image_subscriber.image_subscriber:main', 
             'yolo11_subscriber = yolo11_subscriber.yolo11_subscriber:main'
-
         ],
     },
 )

@@ -4,40 +4,40 @@ import supervision as sv
 from tqdm import tqdm
 from inference.models.yolo_world.yolo_world import YOLOWorld
 
-import string
-import nltk
-from nltk import word_tokenize, pos_tag
-# import ssl
+# import string
+# import nltk
+# from nltk import word_tokenize, pos_tag
+# # import ssl
 
-# try:
-#     _create_unverified_https_context = ssl._create_unverified_context
-# except AttributeError:
-#     pass
-# else:
-#     ssl._create_default_https_context = _create_unverified_https_context
+# # try:
+# #     _create_unverified_https_context = ssl._create_unverified_context
+# # except AttributeError:
+# #     pass
+# # else:
+# #     ssl._create_default_https_context = _create_unverified_https_context
 
-nltk.download()
+# nltk.download()
 
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+# nltk.download('punkt')
+# nltk.download('averaged_perceptron_tagger')
 
 
-def extract_noun_phrases(text):
+# def extract_noun_phrases(text):
     
-    tokens = word_tokenize(text)
-    tokens = [token for token in tokens if token not in string.punctuation]
-    tagged = pos_tag(tokens)
-    print(tagged)
-    grammar = 'NP: {<DT>?<JJ.*>*<NN.*>+}'
-    cp = nltk.RegexpParser(grammar)
-    result = cp.parse(tagged)
+#     tokens = word_tokenize(text)
+#     tokens = [token for token in tokens if token not in string.punctuation]
+#     tagged = pos_tag(tokens)
+#     print(tagged)
+#     grammar = 'NP: {<DT>?<JJ.*>*<NN.*>+}'
+#     cp = nltk.RegexpParser(grammar)
+#     result = cp.parse(tagged)
     
-    noun_phrases = []
-    for subtree in result.subtrees():
-        if subtree.label() == 'NP':
-            noun_phrases.append(' '.join(t[0] for t in subtree.leaves()))
+#     noun_phrases = []
+#     for subtree in result.subtrees():
+#         if subtree.label() == 'NP':
+#             noun_phrases.append(' '.join(t[0] for t in subtree.leaves()))
     
-    return noun_phrases
+#     return noun_phrases
 
 BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
@@ -49,7 +49,8 @@ model = YOLOWorld(model_id="yolo_world/s")
 
 # classes = ["chair","table","shelf","person"]
 
-classes = extract_noun_phrases('white car')
+# classes = extract_noun_phrases('car')
+classes = ["car", "person"]
 model.set_classes(classes)
 
 if not video_capture.isOpened():
