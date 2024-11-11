@@ -59,29 +59,170 @@ albu_train_transforms = [
 backend_args = None
 base_lr = 0.0002
 batch_shapes_cfg = None
-close_mosaic_epochs = 2
+close_mosaic_epochs = 10
+coco_train_dataset = dict(
+    _delete_=True,
+    class_text_path='data/texts/coco_class_texts.json',
+    dataset=dict(
+        ann_file='data.json',
+        data_prefix=dict(img='train/'),
+        data_root='data/hand_gestures_v6i.yolov5pytorch',
+        filter_cfg=dict(filter_empty_gt=False, min_size=32),
+        type='YOLOv5CocoDataset'),
+    pipeline=[
+        dict(backend_args=None, type='LoadImageFromFile'),
+        dict(
+            mask2bbox=True,
+            type='LoadAnnotations',
+            with_bbox=True,
+            with_mask=True),
+        dict(
+            img_scale=(
+                640,
+                640,
+            ),
+            pad_val=114.0,
+            pre_transform=[
+                dict(backend_args=None, type='LoadImageFromFile'),
+                dict(
+                    mask2bbox=True,
+                    type='LoadAnnotations',
+                    with_bbox=True,
+                    with_mask=True),
+            ],
+            type='MultiModalMosaic'),
+        dict(prob=0.3, type='YOLOv5CopyPaste'),
+        dict(
+            border=(
+                -320,
+                -320,
+            ),
+            border_val=(
+                114,
+                114,
+                114,
+            ),
+            max_aspect_ratio=100.0,
+            max_rotate_degree=0.0,
+            max_shear_degree=0.0,
+            min_area_ratio=0.01,
+            scaling_ratio_range=(
+                0.09999999999999998,
+                1.9,
+            ),
+            type='YOLOv5RandomAffine',
+            use_mask_refine=True),
+        dict(
+            pre_transform=[
+                dict(backend_args=None, type='LoadImageFromFile'),
+                dict(
+                    mask2bbox=True,
+                    type='LoadAnnotations',
+                    with_bbox=True,
+                    with_mask=True),
+                dict(
+                    img_scale=(
+                        640,
+                        640,
+                    ),
+                    pad_val=114.0,
+                    pre_transform=[
+                        dict(backend_args=None, type='LoadImageFromFile'),
+                        dict(
+                            mask2bbox=True,
+                            type='LoadAnnotations',
+                            with_bbox=True,
+                            with_mask=True),
+                    ],
+                    type='MultiModalMosaic'),
+                dict(prob=0.3, type='YOLOv5CopyPaste'),
+                dict(
+                    border=(
+                        -320,
+                        -320,
+                    ),
+                    border_val=(
+                        114,
+                        114,
+                        114,
+                    ),
+                    max_aspect_ratio=100.0,
+                    max_rotate_degree=0.0,
+                    max_shear_degree=0.0,
+                    min_area_ratio=0.01,
+                    scaling_ratio_range=(
+                        0.09999999999999998,
+                        1.9,
+                    ),
+                    type='YOLOv5RandomAffine',
+                    use_mask_refine=True),
+            ],
+            prob=0.15,
+            type='YOLOv5MultiModalMixUp'),
+        dict(keys=[
+            'gt_masks',
+        ], type='RemoveDataElement'),
+        dict(
+            bbox_params=dict(
+                format='pascal_voc',
+                label_fields=[
+                    'gt_bboxes_labels',
+                    'gt_ignore_flags',
+                ],
+                type='BboxParams'),
+            keymap=dict(gt_bboxes='bboxes', img='image'),
+            transforms=[
+                dict(p=0.01, type='Blur'),
+                dict(p=0.01, type='MedianBlur'),
+                dict(p=0.01, type='ToGray'),
+                dict(p=0.01, type='CLAHE'),
+            ],
+            type='mmdet.Albu'),
+        dict(type='YOLOv5HSVRandomAug'),
+        dict(prob=0.5, type='mmdet.RandomFlip'),
+        dict(
+            max_num_samples=7,
+            num_neg_samples=(
+                7,
+                7,
+            ),
+            padding_to_max=True,
+            padding_value='',
+            type='RandomLoadText'),
+        dict(
+            meta_keys=(
+                'img_id',
+                'img_path',
+                'ori_shape',
+                'img_shape',
+                'flip',
+                'flip_direction',
+                'texts',
+            ),
+            type='mmdet.PackDetInputs'),
+    ],
+    type='MultiModalDataset')
 coco_val_dataset = dict(
     _delete_=True,
-    class_text_path='data/texts/lvis_v1_class_texts.json',
+    class_text_path='data/texts/coco_class_texts.json',
     dataset=dict(
-        ann_file='lvis/lvis_v1_minival_inserted_image_name.json',
-        batch_shapes_cfg=None,
-        data_prefix=dict(img=''),
-        data_root='data/coco/',
-        test_mode=True,
-        type='YOLOv5LVISV1Dataset'),
+        ann_file='annotations/instances_val2017.json',
+        data_prefix=dict(img='val2017/'),
+        data_root='data/coco',
+        filter_cfg=dict(filter_empty_gt=False, min_size=32),
+        type='YOLOv5CocoDataset'),
     pipeline=[
-        dict(type='LoadImageFromFile'),
+        dict(backend_args=None, type='LoadImageFromFile'),
         dict(scale=(
-            1280,
-            1280,
+            640,
+            640,
         ), type='YOLOv5KeepRatioResize'),
         dict(
             allow_scale_up=False,
             pad_val=dict(img=114),
             scale=(
-                1280,
-                1280,
+                640,
+                640,
             ),
             type='LetterResize'),
         dict(_scope_='mmdet', type='LoadAnnotations', with_bbox=True),
@@ -99,6 +240,7 @@ coco_val_dataset = dict(
             type='mmdet.PackDetInputs'),
     ],
     type='MultiModalDataset')
+copypaste_prob = 0.3
 custom_hooks = [
     dict(
         ema_type='ExpMomentumEMA',
@@ -108,20 +250,24 @@ custom_hooks = [
         type='EMAHook',
         update_buffers=True),
     dict(
-        switch_epoch=18,
+        switch_epoch=-5,
         switch_pipeline=[
             dict(backend_args=None, type='LoadImageFromFile'),
-            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                mask2bbox=True,
+                type='LoadAnnotations',
+                with_bbox=True,
+                with_mask=True),
             dict(scale=(
-                1280,
-                1280,
+                640,
+                640,
             ), type='YOLOv5KeepRatioResize'),
             dict(
                 allow_scale_up=True,
                 pad_val=dict(img=114.0),
                 scale=(
-                    1280,
-                    1280,
+                    640,
+                    640,
                 ),
                 type='LetterResize'),
             dict(
@@ -133,11 +279,16 @@ custom_hooks = [
                 max_aspect_ratio=100,
                 max_rotate_degree=0.0,
                 max_shear_degree=0.0,
+                min_area_ratio=0.01,
                 scaling_ratio_range=(
                     0.09999999999999998,
                     1.9,
                 ),
-                type='YOLOv5RandomAffine'),
+                type='YOLOv5RandomAffine',
+                use_mask_refine=True),
+            dict(keys=[
+                'gt_masks',
+            ], type='RemoveDataElement'),
             dict(
                 bbox_params=dict(
                     format='pascal_voc',
@@ -157,10 +308,10 @@ custom_hooks = [
             dict(type='YOLOv5HSVRandomAug'),
             dict(prob=0.5, type='mmdet.RandomFlip'),
             dict(
-                max_num_samples=80,
+                max_num_samples=7,
                 num_neg_samples=(
-                    1203,
-                    1203,
+                    7,
+                    7,
                 ),
                 padding_to_max=True,
                 padding_value='',
@@ -188,15 +339,11 @@ dataset_type = 'YOLOv5CocoDataset'
 deepen_factor = 1.0
 default_hooks = dict(
     checkpoint=dict(
-        interval=2,
-        max_keep_ckpts=2,
-        rule='greater',
-        save_best='auto',
-        type='CheckpointHook'),
+        interval=5, max_keep_ckpts=-1, save_best=None, type='CheckpointHook'),
     logger=dict(interval=50, type='LoggerHook'),
     param_scheduler=dict(
         lr_factor=0.01,
-        max_epochs=20,
+        max_epochs=5,
         scheduler_type='linear',
         type='YOLOv5ParamSchedulerHook'),
     sampler_seed=dict(type='DistSamplerSeedHook'),
@@ -207,86 +354,9 @@ env_cfg = dict(
     cudnn_benchmark=True,
     dist_cfg=dict(backend='nccl'),
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
-flickr_train_dataset = dict(
-    ann_file='annotations/final_flickr_separateGT_train.json',
-    data_prefix=dict(img='full_images/'),
-    data_root='data/flickr/',
-    filter_cfg=dict(filter_empty_gt=True, min_size=32),
-    pipeline=[
-        dict(backend_args=None, type='LoadImageFromFile'),
-        dict(type='LoadAnnotations', with_bbox=True),
-        dict(
-            img_scale=(
-                1280,
-                1280,
-            ),
-            pad_val=114.0,
-            pre_transform=[
-                dict(backend_args=None, type='LoadImageFromFile'),
-                dict(type='LoadAnnotations', with_bbox=True),
-            ],
-            type='MultiModalMosaic'),
-        dict(
-            border=(
-                -640,
-                -640,
-            ),
-            border_val=(
-                114,
-                114,
-                114,
-            ),
-            max_aspect_ratio=100,
-            max_rotate_degree=0.0,
-            max_shear_degree=0.0,
-            scaling_ratio_range=(
-                0.09999999999999998,
-                1.9,
-            ),
-            type='YOLOv5RandomAffine'),
-        dict(
-            bbox_params=dict(
-                format='pascal_voc',
-                label_fields=[
-                    'gt_bboxes_labels',
-                    'gt_ignore_flags',
-                ],
-                type='BboxParams'),
-            keymap=dict(gt_bboxes='bboxes', img='image'),
-            transforms=[
-                dict(p=0.01, type='Blur'),
-                dict(p=0.01, type='MedianBlur'),
-                dict(p=0.01, type='ToGray'),
-                dict(p=0.01, type='CLAHE'),
-            ],
-            type='mmdet.Albu'),
-        dict(type='YOLOv5HSVRandomAug'),
-        dict(prob=0.5, type='mmdet.RandomFlip'),
-        dict(
-            max_num_samples=80,
-            num_neg_samples=(
-                1203,
-                1203,
-            ),
-            padding_to_max=True,
-            padding_value='',
-            type='RandomLoadText'),
-        dict(
-            meta_keys=(
-                'img_id',
-                'img_path',
-                'ori_shape',
-                'img_shape',
-                'flip',
-                'flip_direction',
-                'texts',
-            ),
-            type='mmdet.PackDetInputs'),
-    ],
-    type='YOLOv5MixedGroundingDataset')
 img_scale = (
-    1280,
-    1280,
+    640,
+    640,
 )
 img_scales = [
     (
@@ -304,6 +374,9 @@ img_scales = [
 ]
 last_stage_out_channels = 512
 last_transform = [
+    dict(keys=[
+        'gt_masks',
+    ], type='RemoveDataElement'),
     dict(
         bbox_params=dict(
             format='pascal_voc',
@@ -333,7 +406,8 @@ last_transform = [
         ),
         type='mmdet.PackDetInputs'),
 ]
-load_from = '../../weights/yolo_world_v2_l_obj365v1_goldg_pretrain_1280ft-9babe3f6.pth'
+launcher = 'none'
+load_from = '../../../weights/yolo_world_v2_l_clip_large_o365v1_goldg_pretrain-8ff2e744.pth'
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 loss_bbox_weight = 7.5
@@ -341,85 +415,9 @@ loss_cls_weight = 0.5
 loss_dfl_weight = 0.375
 lr_factor = 0.01
 max_aspect_ratio = 100
-max_epochs = 20
+max_epochs = 5
 max_keep_ckpts = 2
-mg_train_dataset = dict(
-    ann_file='annotations/final_mixed_train_no_coco.json',
-    data_prefix=dict(img='gqa/images/'),
-    data_root='data/mixed_grounding/',
-    filter_cfg=dict(filter_empty_gt=False, min_size=32),
-    pipeline=[
-        dict(backend_args=None, type='LoadImageFromFile'),
-        dict(type='LoadAnnotations', with_bbox=True),
-        dict(
-            img_scale=(
-                1280,
-                1280,
-            ),
-            pad_val=114.0,
-            pre_transform=[
-                dict(backend_args=None, type='LoadImageFromFile'),
-                dict(type='LoadAnnotations', with_bbox=True),
-            ],
-            type='MultiModalMosaic'),
-        dict(
-            border=(
-                -640,
-                -640,
-            ),
-            border_val=(
-                114,
-                114,
-                114,
-            ),
-            max_aspect_ratio=100,
-            max_rotate_degree=0.0,
-            max_shear_degree=0.0,
-            scaling_ratio_range=(
-                0.09999999999999998,
-                1.9,
-            ),
-            type='YOLOv5RandomAffine'),
-        dict(
-            bbox_params=dict(
-                format='pascal_voc',
-                label_fields=[
-                    'gt_bboxes_labels',
-                    'gt_ignore_flags',
-                ],
-                type='BboxParams'),
-            keymap=dict(gt_bboxes='bboxes', img='image'),
-            transforms=[
-                dict(p=0.01, type='Blur'),
-                dict(p=0.01, type='MedianBlur'),
-                dict(p=0.01, type='ToGray'),
-                dict(p=0.01, type='CLAHE'),
-            ],
-            type='mmdet.Albu'),
-        dict(type='YOLOv5HSVRandomAug'),
-        dict(prob=0.5, type='mmdet.RandomFlip'),
-        dict(
-            max_num_samples=80,
-            num_neg_samples=(
-                1203,
-                1203,
-            ),
-            padding_to_max=True,
-            padding_value='',
-            type='RandomLoadText'),
-        dict(
-            meta_keys=(
-                'img_id',
-                'img_path',
-                'ori_shape',
-                'img_shape',
-                'flip',
-                'flip_direction',
-                'texts',
-            ),
-            type='mmdet.PackDetInputs'),
-    ],
-    type='YOLOv5MixedGroundingDataset')
+min_area_ratio = 0.01
 mixup_prob = 0.15
 model = dict(
     backbone=dict(
@@ -454,7 +452,7 @@ model = dict(
                 512,
             ],
             norm_cfg=dict(eps=0.001, momentum=0.03, type='BN'),
-            num_classes=80,
+            num_classes=7,
             reg_max=16,
             type='YOLOWorldHeadModule',
             use_bn_head=True,
@@ -525,8 +523,8 @@ model = dict(
         ],
         type='YOLOWorldPAFPN',
         widen_factor=1.0),
-    num_test_classes=1203,
-    num_train_classes=80,
+    num_test_classes=7,
+    num_train_classes=7,
     test_cfg=dict(
         max_per_img=300,
         multi_label=True,
@@ -538,7 +536,7 @@ model = dict(
             alpha=0.5,
             beta=6.0,
             eps=1e-09,
-            num_classes=80,
+            num_classes=7,
             topk=10,
             type='BatchTaskAlignedAssigner',
             use_ciou=True)),
@@ -558,9 +556,14 @@ mosaic_affine_transform = [
         pad_val=114.0,
         pre_transform=[
             dict(backend_args=None, type='LoadImageFromFile'),
-            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                mask2bbox=True,
+                type='LoadAnnotations',
+                with_bbox=True,
+                with_mask=True),
         ],
-        type='Mosaic'),
+        type='MultiModalMosaic'),
+    dict(prob=0.3, type='YOLOv5CopyPaste'),
     dict(
         border=(
             -320,
@@ -571,14 +574,16 @@ mosaic_affine_transform = [
             114,
             114,
         ),
-        max_aspect_ratio=100,
+        max_aspect_ratio=100.0,
         max_rotate_degree=0.0,
         max_shear_degree=0.0,
+        min_area_ratio=0.01,
         scaling_ratio_range=(
             0.09999999999999998,
             1.9,
         ),
-        type='YOLOv5RandomAffine'),
+        type='YOLOv5RandomAffine',
+        use_mask_refine=True),
 ]
 neck_embed_channels = [
     128,
@@ -591,110 +596,30 @@ neck_num_heads = [
     8,
 ]
 norm_cfg = dict(eps=0.001, momentum=0.03, type='BN')
-num_classes = 1203
+num_classes = 7
 num_det_layers = 3
-num_training_classes = 80
-obj365v1_train_dataset = dict(
-    class_text_path='data/texts/obj365v1_class_texts.json',
-    dataset=dict(
-        ann_file='annotations/objects365_train.json',
-        data_prefix=dict(img='train/'),
-        data_root='data/objects365v1/',
-        filter_cfg=dict(filter_empty_gt=False, min_size=32),
-        type='YOLOv5Objects365V1Dataset'),
-    pipeline=[
-        dict(backend_args=None, type='LoadImageFromFile'),
-        dict(type='LoadAnnotations', with_bbox=True),
-        dict(
-            img_scale=(
-                1280,
-                1280,
-            ),
-            pad_val=114.0,
-            pre_transform=[
-                dict(backend_args=None, type='LoadImageFromFile'),
-                dict(type='LoadAnnotations', with_bbox=True),
-            ],
-            type='MultiModalMosaic'),
-        dict(
-            border=(
-                -640,
-                -640,
-            ),
-            border_val=(
-                114,
-                114,
-                114,
-            ),
-            max_aspect_ratio=100,
-            max_rotate_degree=0.0,
-            max_shear_degree=0.0,
-            scaling_ratio_range=(
-                0.09999999999999998,
-                1.9,
-            ),
-            type='YOLOv5RandomAffine'),
-        dict(
-            bbox_params=dict(
-                format='pascal_voc',
-                label_fields=[
-                    'gt_bboxes_labels',
-                    'gt_ignore_flags',
-                ],
-                type='BboxParams'),
-            keymap=dict(gt_bboxes='bboxes', img='image'),
-            transforms=[
-                dict(p=0.01, type='Blur'),
-                dict(p=0.01, type='MedianBlur'),
-                dict(p=0.01, type='ToGray'),
-                dict(p=0.01, type='CLAHE'),
-            ],
-            type='mmdet.Albu'),
-        dict(type='YOLOv5HSVRandomAug'),
-        dict(prob=0.5, type='mmdet.RandomFlip'),
-        dict(
-            max_num_samples=80,
-            num_neg_samples=(
-                1203,
-                1203,
-            ),
-            padding_to_max=True,
-            padding_value='',
-            type='RandomLoadText'),
-        dict(
-            meta_keys=(
-                'img_id',
-                'img_path',
-                'ori_shape',
-                'img_shape',
-                'flip',
-                'flip_direction',
-                'texts',
-            ),
-            type='mmdet.PackDetInputs'),
-    ],
-    type='MultiModalDataset')
+num_training_classes = 7
 optim_wrapper = dict(
     clip_grad=dict(max_norm=10.0),
     constructor='YOLOWv5OptimizerConstructor',
     optimizer=dict(
-        batch_size_per_gpu=4, lr=0.0002, type='AdamW', weight_decay=0.025),
+        batch_size_per_gpu=16, lr=0.0002, type='AdamW', weight_decay=0.001),
     paramwise_cfg=dict(
-        bias_decay_mult=0.0,
         custom_keys=dict({
             'backbone.text_model': dict(lr_mult=0.01),
             'logit_scale': dict(weight_decay=0.0)
-        }),
-        norm_decay_mult=0.0),
+        })),
     type='OptimWrapper')
 param_scheduler = None
-persistent_workers = True
+persistent_workers = False
 pre_transform = [
     dict(backend_args=None, type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        mask2bbox=True, type='LoadAnnotations', with_bbox=True,
+        with_mask=True),
 ]
 resume = False
-save_epoch_intervals = 2
+save_epoch_intervals = 5
 strides = [
     8,
     16,
@@ -707,26 +632,25 @@ test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        class_text_path='data/texts/lvis_v1_class_texts.json',
+        class_text_path='data/texts/coco_class_texts.json',
         dataset=dict(
-            ann_file='lvis/lvis_v1_minival_inserted_image_name.json',
-            batch_shapes_cfg=None,
-            data_prefix=dict(img=''),
-            data_root='data/coco/',
-            test_mode=True,
-            type='YOLOv5LVISV1Dataset'),
+            ann_file='annotations/instances_val2017.json',
+            data_prefix=dict(img='val2017/'),
+            data_root='data/coco',
+            filter_cfg=dict(filter_empty_gt=False, min_size=32),
+            type='YOLOv5CocoDataset'),
         pipeline=[
-            dict(type='LoadImageFromFile'),
+            dict(backend_args=None, type='LoadImageFromFile'),
             dict(scale=(
-                1280,
-                1280,
+                640,
+                640,
             ), type='YOLOv5KeepRatioResize'),
             dict(
                 allow_scale_up=False,
                 pad_val=dict(img=114),
                 scale=(
-                    1280,
-                    1280,
+                    640,
+                    640,
                 ),
                 type='LetterResize'),
             dict(_scope_='mmdet', type='LoadAnnotations', with_bbox=True),
@@ -750,26 +674,26 @@ test_dataloader = dict(
     pin_memory=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 test_evaluator = dict(
-    ann_file='data/coco/lvis/lvis_v1_minival_inserted_image_name.json',
+    ann_file='data/coco/annotations/instances_val2017.json',
     metric='bbox',
     proposal_nums=(
         100,
         1,
         10,
     ),
-    type='mmdet.LVISMetric')
+    type='mmdet.CocoMetric')
 test_pipeline = [
-    dict(type='LoadImageFromFile'),
+    dict(backend_args=None, type='LoadImageFromFile'),
     dict(scale=(
-        1280,
-        1280,
+        640,
+        640,
     ), type='YOLOv5KeepRatioResize'),
     dict(
         allow_scale_up=False,
         pad_val=dict(img=114),
         scale=(
-            1280,
-            1280,
+            640,
+            640,
         ),
         type='LetterResize'),
     dict(_scope_='mmdet', type='LoadAnnotations', with_bbox=True),
@@ -790,10 +714,10 @@ text_channels = 512
 text_model_name = 'openai/clip-vit-base-patch32'
 text_transform = [
     dict(
-        max_num_samples=80,
+        max_num_samples=7,
         num_neg_samples=(
-            1203,
-            1203,
+            7,
+            7,
         ),
         padding_to_max=True,
         padding_value='',
@@ -811,300 +735,258 @@ text_transform = [
         type='mmdet.PackDetInputs'),
 ]
 train_ann_file = 'annotations/instances_train2017.json'
-train_batch_size_per_gpu = 4
+train_batch_size_per_gpu = 16
 train_cfg = dict(
     dynamic_intervals=[
         (
-            18,
+            -5,
             1,
         ),
     ],
-    max_epochs=20,
+    max_epochs=5,
     type='EpochBasedTrainLoop',
-    val_interval=10)
+    val_interval=5)
 train_data_prefix = 'train2017/'
 train_dataloader = dict(
-    batch_size=4,
+    batch_size=16,
     collate_fn=dict(type='yolow_collate'),
     dataset=dict(
-        datasets=[
+        class_text_path='data/texts/coco_class_texts.json',
+        dataset=dict(
+            ann_file='data.json',
+            data_prefix=dict(img='train/'),
+            data_root='data/hand_gestures_v6i.yolov5pytorch',
+            filter_cfg=dict(filter_empty_gt=False, min_size=32),
+            type='YOLOv5CocoDataset'),
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
             dict(
-                class_text_path='data/texts/obj365v1_class_texts.json',
-                dataset=dict(
-                    ann_file='annotations/objects365_train.json',
-                    data_prefix=dict(img='train/'),
-                    data_root='data/objects365v1/',
-                    filter_cfg=dict(filter_empty_gt=False, min_size=32),
-                    type='YOLOv5Objects365V1Dataset'),
-                pipeline=[
+                mask2bbox=True,
+                type='LoadAnnotations',
+                with_bbox=True,
+                with_mask=True),
+            dict(
+                img_scale=(
+                    640,
+                    640,
+                ),
+                pad_val=114.0,
+                pre_transform=[
                     dict(backend_args=None, type='LoadImageFromFile'),
-                    dict(type='LoadAnnotations', with_bbox=True),
+                    dict(
+                        mask2bbox=True,
+                        type='LoadAnnotations',
+                        with_bbox=True,
+                        with_mask=True),
+                ],
+                type='MultiModalMosaic'),
+            dict(prob=0.3, type='YOLOv5CopyPaste'),
+            dict(
+                border=(
+                    -320,
+                    -320,
+                ),
+                border_val=(
+                    114,
+                    114,
+                    114,
+                ),
+                max_aspect_ratio=100.0,
+                max_rotate_degree=0.0,
+                max_shear_degree=0.0,
+                min_area_ratio=0.01,
+                scaling_ratio_range=(
+                    0.09999999999999998,
+                    1.9,
+                ),
+                type='YOLOv5RandomAffine',
+                use_mask_refine=True),
+            dict(
+                pre_transform=[
+                    dict(backend_args=None, type='LoadImageFromFile'),
+                    dict(
+                        mask2bbox=True,
+                        type='LoadAnnotations',
+                        with_bbox=True,
+                        with_mask=True),
                     dict(
                         img_scale=(
-                            1280,
-                            1280,
+                            640,
+                            640,
                         ),
                         pad_val=114.0,
                         pre_transform=[
                             dict(backend_args=None, type='LoadImageFromFile'),
-                            dict(type='LoadAnnotations', with_bbox=True),
+                            dict(
+                                mask2bbox=True,
+                                type='LoadAnnotations',
+                                with_bbox=True,
+                                with_mask=True),
                         ],
                         type='MultiModalMosaic'),
+                    dict(prob=0.3, type='YOLOv5CopyPaste'),
                     dict(
                         border=(
-                            -640,
-                            -640,
+                            -320,
+                            -320,
                         ),
                         border_val=(
                             114,
                             114,
                             114,
                         ),
-                        max_aspect_ratio=100,
+                        max_aspect_ratio=100.0,
                         max_rotate_degree=0.0,
                         max_shear_degree=0.0,
+                        min_area_ratio=0.01,
                         scaling_ratio_range=(
                             0.09999999999999998,
                             1.9,
                         ),
-                        type='YOLOv5RandomAffine'),
-                    dict(
-                        bbox_params=dict(
-                            format='pascal_voc',
-                            label_fields=[
-                                'gt_bboxes_labels',
-                                'gt_ignore_flags',
-                            ],
-                            type='BboxParams'),
-                        keymap=dict(gt_bboxes='bboxes', img='image'),
-                        transforms=[
-                            dict(p=0.01, type='Blur'),
-                            dict(p=0.01, type='MedianBlur'),
-                            dict(p=0.01, type='ToGray'),
-                            dict(p=0.01, type='CLAHE'),
-                        ],
-                        type='mmdet.Albu'),
-                    dict(type='YOLOv5HSVRandomAug'),
-                    dict(prob=0.5, type='mmdet.RandomFlip'),
-                    dict(
-                        max_num_samples=80,
-                        num_neg_samples=(
-                            1203,
-                            1203,
-                        ),
-                        padding_to_max=True,
-                        padding_value='',
-                        type='RandomLoadText'),
-                    dict(
-                        meta_keys=(
-                            'img_id',
-                            'img_path',
-                            'ori_shape',
-                            'img_shape',
-                            'flip',
-                            'flip_direction',
-                            'texts',
-                        ),
-                        type='mmdet.PackDetInputs'),
+                        type='YOLOv5RandomAffine',
+                        use_mask_refine=True),
                 ],
-                type='MultiModalDataset'),
+                prob=0.15,
+                type='YOLOv5MultiModalMixUp'),
+            dict(keys=[
+                'gt_masks',
+            ], type='RemoveDataElement'),
             dict(
-                ann_file='annotations/final_flickr_separateGT_train.json',
-                data_prefix=dict(img='full_images/'),
-                data_root='data/flickr/',
-                filter_cfg=dict(filter_empty_gt=True, min_size=32),
-                pipeline=[
-                    dict(backend_args=None, type='LoadImageFromFile'),
-                    dict(type='LoadAnnotations', with_bbox=True),
-                    dict(
-                        img_scale=(
-                            1280,
-                            1280,
-                        ),
-                        pad_val=114.0,
-                        pre_transform=[
-                            dict(backend_args=None, type='LoadImageFromFile'),
-                            dict(type='LoadAnnotations', with_bbox=True),
-                        ],
-                        type='MultiModalMosaic'),
-                    dict(
-                        border=(
-                            -640,
-                            -640,
-                        ),
-                        border_val=(
-                            114,
-                            114,
-                            114,
-                        ),
-                        max_aspect_ratio=100,
-                        max_rotate_degree=0.0,
-                        max_shear_degree=0.0,
-                        scaling_ratio_range=(
-                            0.09999999999999998,
-                            1.9,
-                        ),
-                        type='YOLOv5RandomAffine'),
-                    dict(
-                        bbox_params=dict(
-                            format='pascal_voc',
-                            label_fields=[
-                                'gt_bboxes_labels',
-                                'gt_ignore_flags',
-                            ],
-                            type='BboxParams'),
-                        keymap=dict(gt_bboxes='bboxes', img='image'),
-                        transforms=[
-                            dict(p=0.01, type='Blur'),
-                            dict(p=0.01, type='MedianBlur'),
-                            dict(p=0.01, type='ToGray'),
-                            dict(p=0.01, type='CLAHE'),
-                        ],
-                        type='mmdet.Albu'),
-                    dict(type='YOLOv5HSVRandomAug'),
-                    dict(prob=0.5, type='mmdet.RandomFlip'),
-                    dict(
-                        max_num_samples=80,
-                        num_neg_samples=(
-                            1203,
-                            1203,
-                        ),
-                        padding_to_max=True,
-                        padding_value='',
-                        type='RandomLoadText'),
-                    dict(
-                        meta_keys=(
-                            'img_id',
-                            'img_path',
-                            'ori_shape',
-                            'img_shape',
-                            'flip',
-                            'flip_direction',
-                            'texts',
-                        ),
-                        type='mmdet.PackDetInputs'),
+                bbox_params=dict(
+                    format='pascal_voc',
+                    label_fields=[
+                        'gt_bboxes_labels',
+                        'gt_ignore_flags',
+                    ],
+                    type='BboxParams'),
+                keymap=dict(gt_bboxes='bboxes', img='image'),
+                transforms=[
+                    dict(p=0.01, type='Blur'),
+                    dict(p=0.01, type='MedianBlur'),
+                    dict(p=0.01, type='ToGray'),
+                    dict(p=0.01, type='CLAHE'),
                 ],
-                type='YOLOv5MixedGroundingDataset'),
+                type='mmdet.Albu'),
+            dict(type='YOLOv5HSVRandomAug'),
+            dict(prob=0.5, type='mmdet.RandomFlip'),
             dict(
-                ann_file='annotations/final_mixed_train_no_coco.json',
-                data_prefix=dict(img='gqa/images/'),
-                data_root='data/mixed_grounding/',
-                filter_cfg=dict(filter_empty_gt=False, min_size=32),
-                pipeline=[
-                    dict(backend_args=None, type='LoadImageFromFile'),
-                    dict(type='LoadAnnotations', with_bbox=True),
-                    dict(
-                        img_scale=(
-                            1280,
-                            1280,
-                        ),
-                        pad_val=114.0,
-                        pre_transform=[
-                            dict(backend_args=None, type='LoadImageFromFile'),
-                            dict(type='LoadAnnotations', with_bbox=True),
-                        ],
-                        type='MultiModalMosaic'),
-                    dict(
-                        border=(
-                            -640,
-                            -640,
-                        ),
-                        border_val=(
-                            114,
-                            114,
-                            114,
-                        ),
-                        max_aspect_ratio=100,
-                        max_rotate_degree=0.0,
-                        max_shear_degree=0.0,
-                        scaling_ratio_range=(
-                            0.09999999999999998,
-                            1.9,
-                        ),
-                        type='YOLOv5RandomAffine'),
-                    dict(
-                        bbox_params=dict(
-                            format='pascal_voc',
-                            label_fields=[
-                                'gt_bboxes_labels',
-                                'gt_ignore_flags',
-                            ],
-                            type='BboxParams'),
-                        keymap=dict(gt_bboxes='bboxes', img='image'),
-                        transforms=[
-                            dict(p=0.01, type='Blur'),
-                            dict(p=0.01, type='MedianBlur'),
-                            dict(p=0.01, type='ToGray'),
-                            dict(p=0.01, type='CLAHE'),
-                        ],
-                        type='mmdet.Albu'),
-                    dict(type='YOLOv5HSVRandomAug'),
-                    dict(prob=0.5, type='mmdet.RandomFlip'),
-                    dict(
-                        max_num_samples=80,
-                        num_neg_samples=(
-                            1203,
-                            1203,
-                        ),
-                        padding_to_max=True,
-                        padding_value='',
-                        type='RandomLoadText'),
-                    dict(
-                        meta_keys=(
-                            'img_id',
-                            'img_path',
-                            'ori_shape',
-                            'img_shape',
-                            'flip',
-                            'flip_direction',
-                            'texts',
-                        ),
-                        type='mmdet.PackDetInputs'),
-                ],
-                type='YOLOv5MixedGroundingDataset'),
+                max_num_samples=7,
+                num_neg_samples=(
+                    7,
+                    7,
+                ),
+                padding_to_max=True,
+                padding_value='',
+                type='RandomLoadText'),
+            dict(
+                meta_keys=(
+                    'img_id',
+                    'img_path',
+                    'ori_shape',
+                    'img_shape',
+                    'flip',
+                    'flip_direction',
+                    'texts',
+                ),
+                type='mmdet.PackDetInputs'),
         ],
-        ignore_keys=[
-            'classes',
-            'palette',
-        ],
-        type='ConcatDataset'),
+        type='MultiModalDataset'),
     num_workers=8,
-    persistent_workers=True,
+    persistent_workers=False,
     pin_memory=True,
     sampler=dict(shuffle=True, type='DefaultSampler'))
 train_num_workers = 8
 train_pipeline = [
     dict(backend_args=None, type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        mask2bbox=True, type='LoadAnnotations', with_bbox=True,
+        with_mask=True),
     dict(
         img_scale=(
-            1280,
-            1280,
+            640,
+            640,
         ),
         pad_val=114.0,
         pre_transform=[
             dict(backend_args=None, type='LoadImageFromFile'),
-            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                mask2bbox=True,
+                type='LoadAnnotations',
+                with_bbox=True,
+                with_mask=True),
         ],
         type='MultiModalMosaic'),
+    dict(prob=0.3, type='YOLOv5CopyPaste'),
     dict(
         border=(
-            -640,
-            -640,
+            -320,
+            -320,
         ),
         border_val=(
             114,
             114,
             114,
         ),
-        max_aspect_ratio=100,
+        max_aspect_ratio=100.0,
         max_rotate_degree=0.0,
         max_shear_degree=0.0,
+        min_area_ratio=0.01,
         scaling_ratio_range=(
             0.09999999999999998,
             1.9,
         ),
-        type='YOLOv5RandomAffine'),
+        type='YOLOv5RandomAffine',
+        use_mask_refine=True),
+    dict(
+        pre_transform=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(
+                mask2bbox=True,
+                type='LoadAnnotations',
+                with_bbox=True,
+                with_mask=True),
+            dict(
+                img_scale=(
+                    640,
+                    640,
+                ),
+                pad_val=114.0,
+                pre_transform=[
+                    dict(backend_args=None, type='LoadImageFromFile'),
+                    dict(
+                        mask2bbox=True,
+                        type='LoadAnnotations',
+                        with_bbox=True,
+                        with_mask=True),
+                ],
+                type='MultiModalMosaic'),
+            dict(prob=0.3, type='YOLOv5CopyPaste'),
+            dict(
+                border=(
+                    -320,
+                    -320,
+                ),
+                border_val=(
+                    114,
+                    114,
+                    114,
+                ),
+                max_aspect_ratio=100.0,
+                max_rotate_degree=0.0,
+                max_shear_degree=0.0,
+                min_area_ratio=0.01,
+                scaling_ratio_range=(
+                    0.09999999999999998,
+                    1.9,
+                ),
+                type='YOLOv5RandomAffine',
+                use_mask_refine=True),
+        ],
+        prob=0.15,
+        type='YOLOv5MultiModalMixUp'),
+    dict(keys=[
+        'gt_masks',
+    ], type='RemoveDataElement'),
     dict(
         bbox_params=dict(
             format='pascal_voc',
@@ -1124,10 +1006,10 @@ train_pipeline = [
     dict(type='YOLOv5HSVRandomAug'),
     dict(prob=0.5, type='mmdet.RandomFlip'),
     dict(
-        max_num_samples=80,
+        max_num_samples=7,
         num_neg_samples=(
-            1203,
-            1203,
+            7,
+            7,
         ),
         padding_to_max=True,
         padding_value='',
@@ -1146,17 +1028,19 @@ train_pipeline = [
 ]
 train_pipeline_stage2 = [
     dict(backend_args=None, type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        mask2bbox=True, type='LoadAnnotations', with_bbox=True,
+        with_mask=True),
     dict(scale=(
-        1280,
-        1280,
+        640,
+        640,
     ), type='YOLOv5KeepRatioResize'),
     dict(
         allow_scale_up=True,
         pad_val=dict(img=114.0),
         scale=(
-            1280,
-            1280,
+            640,
+            640,
         ),
         type='LetterResize'),
     dict(
@@ -1168,11 +1052,16 @@ train_pipeline_stage2 = [
         max_aspect_ratio=100,
         max_rotate_degree=0.0,
         max_shear_degree=0.0,
+        min_area_ratio=0.01,
         scaling_ratio_range=(
             0.09999999999999998,
             1.9,
         ),
-        type='YOLOv5RandomAffine'),
+        type='YOLOv5RandomAffine',
+        use_mask_refine=True),
+    dict(keys=[
+        'gt_masks',
+    ], type='RemoveDataElement'),
     dict(
         bbox_params=dict(
             format='pascal_voc',
@@ -1192,10 +1081,10 @@ train_pipeline_stage2 = [
     dict(type='YOLOv5HSVRandomAug'),
     dict(prob=0.5, type='mmdet.RandomFlip'),
     dict(
-        max_num_samples=80,
+        max_num_samples=7,
         num_neg_samples=(
-            1203,
-            1203,
+            7,
+            7,
         ),
         padding_to_max=True,
         padding_value='',
@@ -1293,6 +1182,7 @@ tta_pipeline = [
         ],
         type='TestTimeAug'),
 ]
+use_mask2refine = True
 val_ann_file = 'annotations/instances_val2017.json'
 val_batch_size_per_gpu = 1
 val_cfg = dict(type='ValLoop')
@@ -1300,26 +1190,25 @@ val_data_prefix = 'val2017/'
 val_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        class_text_path='data/texts/lvis_v1_class_texts.json',
+        class_text_path='data/texts/coco_class_texts.json',
         dataset=dict(
-            ann_file='lvis/lvis_v1_minival_inserted_image_name.json',
-            batch_shapes_cfg=None,
-            data_prefix=dict(img=''),
-            data_root='data/coco/',
-            test_mode=True,
-            type='YOLOv5LVISV1Dataset'),
+            ann_file='annotations/instances_val2017.json',
+            data_prefix=dict(img='val2017/'),
+            data_root='data/coco',
+            filter_cfg=dict(filter_empty_gt=False, min_size=32),
+            type='YOLOv5CocoDataset'),
         pipeline=[
-            dict(type='LoadImageFromFile'),
+            dict(backend_args=None, type='LoadImageFromFile'),
             dict(scale=(
-                1280,
-                1280,
+                640,
+                640,
             ), type='YOLOv5KeepRatioResize'),
             dict(
                 allow_scale_up=False,
                 pad_val=dict(img=114),
                 scale=(
-                    1280,
-                    1280,
+                    640,
+                    640,
                 ),
                 type='LetterResize'),
             dict(_scope_='mmdet', type='LoadAnnotations', with_bbox=True),
@@ -1343,14 +1232,14 @@ val_dataloader = dict(
     pin_memory=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 val_evaluator = dict(
-    ann_file='data/coco/lvis/lvis_v1_minival_inserted_image_name.json',
+    ann_file='data/coco/annotations/instances_val2017.json',
     metric='bbox',
     proposal_nums=(
         100,
         1,
         10,
     ),
-    type='mmdet.LVISMetric')
+    type='mmdet.CocoMetric')
 val_interval_stage2 = 1
 val_num_workers = 2
 vis_backends = [
@@ -1362,6 +1251,6 @@ visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
     ])
-weight_decay = 0.025
+weight_decay = 0.001
 widen_factor = 1.0
-work_dir = '.'
+work_dir = './work_dirs/yolo_world_v2_l_vlpan_bn_2e-4_80e_8gpus_mask-refine_finetune_coco_copy'

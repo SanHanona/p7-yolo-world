@@ -57,16 +57,16 @@ albu_train_transforms = [
     dict(p=0.01, type='CLAHE'),
 ]
 backend_args = None
-base_lr = 0.001
+base_lr = 0.0002
 batch_shapes_cfg = None
 close_mosaic_epochs = 10
 coco_train_dataset = dict(
     _delete_=True,
-    class_text_path='../data/texts/coco_class_texts.json',
+    class_text_path='../data/hand_gestures_v6i.yolov5pytorch/data.json',
     dataset=dict(
-        ann_file='annotations/instances_train2017.json',
-        data_prefix=dict(img='train2017/'),
-        data_root='../data/coco',
+        ann_file='coco.json',
+        data_prefix=dict(img='train/'),
+        data_root='../data/hand_gestures_v6i.yolov5pytorch',
         filter_cfg=dict(filter_empty_gt=False, min_size=32),
         type='YOLOv5CocoDataset'),
     pipeline=[
@@ -181,10 +181,10 @@ coco_train_dataset = dict(
         dict(type='YOLOv5HSVRandomAug'),
         dict(prob=0.5, type='mmdet.RandomFlip'),
         dict(
-            max_num_samples=80,
+            max_num_samples=7,
             num_neg_samples=(
-                80,
-                80,
+                7,
+                7,
             ),
             padding_to_max=True,
             padding_value='',
@@ -204,11 +204,11 @@ coco_train_dataset = dict(
     type='MultiModalDataset')
 coco_val_dataset = dict(
     _delete_=True,
-    class_text_path='../data/texts/coco_class_texts.json',
+    class_text_path='../data/hand_gestures_v6i.yolov5pytorch/data.json',
     dataset=dict(
-        ann_file='annotations/instances_val2017.json',
-        data_prefix=dict(img='val2017/'),
-        data_root='../data/coco',
+        ann_file='coco_val.json',
+        data_prefix=dict(img='valid/'),
+        data_root='../data/hand_gestures_v6i.yolov5pytorch',
         filter_cfg=dict(filter_empty_gt=False, min_size=32),
         type='YOLOv5CocoDataset'),
     pipeline=[
@@ -250,7 +250,7 @@ custom_hooks = [
         type='EMAHook',
         update_buffers=True),
     dict(
-        switch_epoch=70,
+        switch_epoch=-5,
         switch_pipeline=[
             dict(backend_args=None, type='LoadImageFromFile'),
             dict(
@@ -308,10 +308,10 @@ custom_hooks = [
             dict(type='YOLOv5HSVRandomAug'),
             dict(prob=0.5, type='mmdet.RandomFlip'),
             dict(
-                max_num_samples=80,
+                max_num_samples=7,
                 num_neg_samples=(
-                    80,
-                    80,
+                    7,
+                    7,
                 ),
                 padding_to_max=True,
                 padding_value='',
@@ -343,7 +343,7 @@ default_hooks = dict(
     logger=dict(interval=50, type='LoggerHook'),
     param_scheduler=dict(
         lr_factor=0.01,
-        max_epochs=80,
+        max_epochs=5,
         scheduler_type='linear',
         type='YOLOv5ParamSchedulerHook'),
     sampler_seed=dict(type='DistSamplerSeedHook'),
@@ -406,7 +406,8 @@ last_transform = [
         ),
         type='mmdet.PackDetInputs'),
 ]
-load_from = '../../weights/yolo_world_v2_l_vlpan_bn_sgd_1e-3_40e_8gpus_finetune_coco_ep80-e1288152.pth'
+launcher = 'none'
+load_from = '../../../weights/yolo_world_v2_l_clip_large_o365v1_goldg_pretrain-8ff2e744.pth'
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 loss_bbox_weight = 7.5
@@ -414,7 +415,7 @@ loss_cls_weight = 0.5
 loss_dfl_weight = 0.375
 lr_factor = 0.01
 max_aspect_ratio = 100
-max_epochs = 80
+max_epochs = 5
 max_keep_ckpts = 2
 min_area_ratio = 0.01
 mixup_prob = 0.15
@@ -451,7 +452,7 @@ model = dict(
                 512,
             ],
             norm_cfg=dict(eps=0.001, momentum=0.03, type='BN'),
-            num_classes=80,
+            num_classes=7,
             reg_max=16,
             type='YOLOWorldHeadModule',
             use_bn_head=True,
@@ -522,8 +523,8 @@ model = dict(
         ],
         type='YOLOWorldPAFPN',
         widen_factor=1.0),
-    num_test_classes=80,
-    num_train_classes=80,
+    num_test_classes=7,
+    num_train_classes=7,
     test_cfg=dict(
         max_per_img=300,
         multi_label=True,
@@ -535,7 +536,7 @@ model = dict(
             alpha=0.5,
             beta=6.0,
             eps=1e-09,
-            num_classes=80,
+            num_classes=7,
             topk=10,
             type='BatchTaskAlignedAssigner',
             use_ciou=True)),
@@ -595,19 +596,14 @@ neck_num_heads = [
     8,
 ]
 norm_cfg = dict(eps=0.001, momentum=0.03, type='BN')
-num_classes = 80
+num_classes = 7
 num_det_layers = 3
-num_training_classes = 80
+num_training_classes = 7
 optim_wrapper = dict(
     clip_grad=dict(max_norm=10.0),
     constructor='YOLOWv5OptimizerConstructor',
     optimizer=dict(
-        batch_size_per_gpu=16,
-        lr=0.001,
-        momentum=0.937,
-        nesterov=True,
-        type='SGD',
-        weight_decay=0.0005),
+        batch_size_per_gpu=16, lr=0.0002, type='AdamW', weight_decay=0.001),
     paramwise_cfg=dict(
         custom_keys=dict({
             'backbone.text_model': dict(lr_mult=0.01),
@@ -636,11 +632,11 @@ test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        class_text_path='../data/texts/coco_class_texts.json',
+        class_text_path='../data/hand_gestures_v6i.yolov5pytorch/data.json',
         dataset=dict(
-            ann_file='annotations/instances_val2017.json',
-            data_prefix=dict(img='val2017/'),
-            data_root='../data/coco',
+            ann_file='coco_val.json',
+            data_prefix=dict(img='valid/'),
+            data_root='../data/hand_gestures_v6i.yolov5pytorch',
             filter_cfg=dict(filter_empty_gt=False, min_size=32),
             type='YOLOv5CocoDataset'),
         pipeline=[
@@ -718,10 +714,10 @@ text_channels = 512
 text_model_name = 'openai/clip-vit-base-patch32'
 text_transform = [
     dict(
-        max_num_samples=80,
+        max_num_samples=7,
         num_neg_samples=(
-            80,
-            80,
+            7,
+            7,
         ),
         padding_to_max=True,
         padding_value='',
@@ -743,11 +739,11 @@ train_batch_size_per_gpu = 16
 train_cfg = dict(
     dynamic_intervals=[
         (
-            70,
+            -5,
             1,
         ),
     ],
-    max_epochs=80,
+    max_epochs=5,
     type='EpochBasedTrainLoop',
     val_interval=5)
 train_data_prefix = 'train2017/'
@@ -755,11 +751,11 @@ train_dataloader = dict(
     batch_size=16,
     collate_fn=dict(type='yolow_collate'),
     dataset=dict(
-        class_text_path='../data/texts/coco_class_texts.json',
+        class_text_path='../data/hand_gestures_v6i.yolov5pytorch/data.json',
         dataset=dict(
-            ann_file='annotations/instances_train2017.json',
-            data_prefix=dict(img='train2017/'),
-            data_root='../data/coco',
+            ann_file='coco.json',
+            data_prefix=dict(img='train/'),
+            data_root='../data/hand_gestures_v6i.yolov5pytorch',
             filter_cfg=dict(filter_empty_gt=False, min_size=32),
             type='YOLOv5CocoDataset'),
         pipeline=[
@@ -874,10 +870,10 @@ train_dataloader = dict(
             dict(type='YOLOv5HSVRandomAug'),
             dict(prob=0.5, type='mmdet.RandomFlip'),
             dict(
-                max_num_samples=80,
+                max_num_samples=7,
                 num_neg_samples=(
-                    80,
-                    80,
+                    7,
+                    7,
                 ),
                 padding_to_max=True,
                 padding_value='',
@@ -1010,10 +1006,10 @@ train_pipeline = [
     dict(type='YOLOv5HSVRandomAug'),
     dict(prob=0.5, type='mmdet.RandomFlip'),
     dict(
-        max_num_samples=80,
+        max_num_samples=7,
         num_neg_samples=(
-            80,
-            80,
+            7,
+            7,
         ),
         padding_to_max=True,
         padding_value='',
@@ -1085,10 +1081,10 @@ train_pipeline_stage2 = [
     dict(type='YOLOv5HSVRandomAug'),
     dict(prob=0.5, type='mmdet.RandomFlip'),
     dict(
-        max_num_samples=80,
+        max_num_samples=7,
         num_neg_samples=(
-            80,
-            80,
+            7,
+            7,
         ),
         padding_to_max=True,
         padding_value='',
@@ -1194,11 +1190,11 @@ val_data_prefix = 'val2017/'
 val_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        class_text_path='../data/texts/coco_class_texts.json',
+        class_text_path='../data/hand_gestures_v6i.yolov5pytorch/data.json',
         dataset=dict(
-            ann_file='annotations/instances_val2017.json',
-            data_prefix=dict(img='val2017/'),
-            data_root='../data/coco',
+            ann_file='coco_val.json',
+            data_prefix=dict(img='valid/'),
+            data_root='../data/hand_gestures_v6i.yolov5pytorch',
             filter_cfg=dict(filter_empty_gt=False, min_size=32),
             type='YOLOv5CocoDataset'),
         pipeline=[
@@ -1236,7 +1232,7 @@ val_dataloader = dict(
     pin_memory=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 val_evaluator = dict(
-    ann_file='data/coco/annotations/instances_val2017.json',
+    ann_file='../data/hand_gestures_v6i.yolov5pytorch/coco.json',
     metric='bbox',
     proposal_nums=(
         100,
@@ -1255,6 +1251,6 @@ visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
     ])
-weight_decay = 0.0005
+weight_decay = 0.001
 widen_factor = 1.0
-work_dir = '.'
+work_dir = './work_dirs/custom_fine_tune'
