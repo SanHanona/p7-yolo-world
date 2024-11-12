@@ -65,6 +65,7 @@ services:
       - PULSE_SERVER=unix:/tmp/pulse_socket
     devices:
       - /dev/video0:/dev/video0
+      - /dev/snd:/dev/snd  # Audio devices (added)
     volumes:
       - /dev/shm:/dev/shm
       - /tmp/pulse_socket:/tmp/pulse_socket:ro 

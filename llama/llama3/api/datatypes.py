@@ -11,7 +11,9 @@ from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, validator
 
 from typing_extensions import Annotated
-from ...datatypes import *  # noqa
+from api.datatypes import *  # noqa
+# from api.datatypes import *  # noqa
+
 
 import base64
 import re
@@ -19,7 +21,7 @@ from io import BytesIO
 
 from PIL import Image as PIL_Image
 
-from ...schema_utils import json_schema_type
+from schema_utils import json_schema_type
 
 
 @json_schema_type
@@ -150,7 +152,7 @@ class ToolParamDefinition(BaseModel):
     param_type: str
     description: Optional[str] = None
     required: Optional[bool] = True
-    default: Optional[Any] = None
+    # default: Optional[Any] = None
 
 
 @json_schema_type

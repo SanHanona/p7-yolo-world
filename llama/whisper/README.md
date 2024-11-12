@@ -33,7 +33,7 @@ scoop install ffmpeg
 
 Start the acquisition by simply running the transcribe_demo.py or by running with the parameters:
 ```
-python transcribe_demo.py ----model "medium" --energy_threshold 1000 --record_timeout 5 --phrase_timeout 3
+python3 transcribe_demo.py --model "medium" --energy_threshold 1000 --record_timeout 5 --phrase_timeout 3
 ```
 
 Available models are : ` 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large-v3', 'large', 'large-v3-turbo', 'turbo' `

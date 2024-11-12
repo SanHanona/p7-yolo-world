@@ -10,7 +10,7 @@ ENV FORCE_CUDA="1" \
     LC_ALL=C.UTF-8
 
 # Set up a working directory
-WORKDIR /llama
+# WORKDIR /llama
 
 # Install essential packages and dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,6 +33,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libopenh264-dev \
     ffmpeg \
     portaudio19-dev \
+    alsa-base \
+    pulseaudio \
+    alsa-utils \
     && locale-gen en_US en_US.UTF-8 \
     && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
@@ -70,12 +73,11 @@ RUN apt-get update && apt-get install -y \
 
 FROM ros AS python_deps
 
-COPY . .
+COPY /llama /llama
 
 RUN pip3 install --upgrade pip wheel \
     && pip3 install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121 \
     && pip3 install \
-        # llama-models \
         blobfile \
         whisper \
         fairscale \
@@ -93,12 +95,21 @@ RUN pip3 install --upgrade pip wheel \
         SpeechRecognition \
         --extra-index-url https://download.pytorch.org/whl/cu121 \
         numpy==1.26.4 
-        #git+https://github.com/openai/whisper.git
+        # setuptools-rust
 
 FROM python_deps AS llama
 
+WORKDIR /llama
+
+RUN pip install llama-models
+
+RUN pip install git+https://github.com/openai/whisper.git
+
 # Additional setup for Llama 3.2-3b
-RUN python3 setup.py install
+RUN ls && python3 setup.py install
+# RUN pip install .
+
+ENV CHECKPOINT_DIR=checkpoints/Llama3.2-3B/
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV FASTRTPS_DEFAULT_PROFILES_FILE=llama_ws/fastdds.xml

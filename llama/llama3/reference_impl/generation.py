@@ -31,17 +31,19 @@ from fairscale.nn.model_parallel.initialize import (
 )
 from termcolor import cprint
 
-from ..api.args import ModelArgs
-from ..api.chat_format import ChatFormat, ModelInput
-from ..api.datatypes import (
+from api.args import ModelArgs
+
+# from ..api.args import ModelArgs
+from api.chat_format import ChatFormat, ModelInput
+from api.datatypes import (
     CompletionMessage,
     InterleavedTextMedia,
     Message,
     StopReason,
     ToolPromptFormat,
 )
-from ..api.tokenizer import Tokenizer
-from .model import Transformer
+from api.tokenizer import Tokenizer
+from reference_impl.model import Transformer
 
 
 @dataclass

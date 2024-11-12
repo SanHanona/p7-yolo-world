@@ -21,7 +21,7 @@ from fairscale.nn.model_parallel.layers import (
 )
 from torch import nn
 
-from ..api import ModelArgs
+from api import ModelArgs
 
 # **NOTE**: This code is not runnable without installing `torch` and `fairscale`
 # dependencies. These dependencies are not part of the default dependencies
