@@ -5,10 +5,6 @@ def generate_launch_description():
     return launch.LaunchDescription([
         launch_ros.actions.Node(
             package='vision',
-            executable='JohnsFunciton',
-            name='JohnsFunciton'),
-        launch_ros.actions.Node(
-            package='vision',
-            executable='yolo11_subscriber',
-            name='yolo11_subscriber'),
+            executable='rgb_subscriber',
+            name='rgb_subscriber'),
   ])
