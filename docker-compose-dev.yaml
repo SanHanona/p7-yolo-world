@@ -69,7 +69,7 @@ services:
     volumes:
       - /dev/shm:/dev/shm
       - /tmp/pulse_socket:/tmp/pulse_socket:ro 
-      - .:/llama
+      - ./llama:/llama
     ports:
       - "8080:8080"
     network_mode: host
