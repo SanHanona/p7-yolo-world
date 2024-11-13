@@ -36,6 +36,12 @@ Start the acquisition by simply running the transcribe_demo.py or by running wit
 python3 transcribe_demo.py --model "medium" --energy_threshold 1000 --record_timeout 5 --phrase_timeout 3
 ```
 
+To run on the AAUlab run 
+```
+python3 transcribe_demo.py --default_microphone "hw:1,7"
+```
+
+
 Available models are : ` 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large-v3', 'large', 'large-v3-turbo', 'turbo' `
 
 
