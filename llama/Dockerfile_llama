@@ -110,7 +110,7 @@ RUN pip install git+https://github.com/openai/whisper.git
 RUN ls && python3 setup.py install
 # RUN pip install .
 
-ENV CHECKPOINT_DIR=checkpoints/Llama3.2-3B/
+ENV CHECKPOINT_DIR=../checkpoints/Llama3.2-3B/
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV FASTRTPS_DEFAULT_PROFILES_FILE=llama_ws/fastdds.xml
