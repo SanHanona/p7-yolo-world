@@ -15,7 +15,7 @@ import numpy as np
 
 from tqdm import tqdm
 from inference.models.yolo_world.yolo_world import YOLOWorld
-from std_msgs.msg import Bool, Int32
+from std_msgs.msg import Bool, Int32MultiArray
 
 BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
@@ -23,6 +23,8 @@ LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=s
 # New branch BABY!
 
 model = YOLO("yolo11s.pt")
+
+
 
 class MinimalSubscriber(Node):
 
@@ -40,13 +42,15 @@ class MinimalSubscriber(Node):
             self.rgb_callback,
             qos_policy)
         
-        self.publish_box = self.create_publisher(Int32, 'box', 10)
+        self.publish_box = self.create_publisher(Int32MultiArray, 'box', 10)
         self.publish_attention = self.create_publisher(Bool, 'attention', 10)
 
         self.tf_broadcaster = TransformBroadcaster(self)
 
         self.start_delay = 0
         self.sub_delay = 0
+        self.not_seen = 0
+        self.missed_frames= 5
 
         self.camera = {'fLeng': 2.87343,
                        'fDist': 0.6,
@@ -68,21 +72,16 @@ class MinimalSubscriber(Node):
         image = img
         sub_image = image[y_min : y_max, x_min : x_max]
 
-
         sub_results = model(sub_image)
-        detections = sv.Detections.from_ultralytics(sub_results[0]).with_nms(threshold=0.5)
+        detections = sv.Detections.from_ultralytics(sub_results[0]).with_nms(threshold=0.05)
         sub_names = detections.data['class_name']
 
         attention = False
 
-        if self.sub_delay > 2:
-            for id in range(len(sub_names)):
-                if sub_names[id] != "eyes":
-                    continue
-                attention = True
-        else:
-            self.sub_delay += 1
-
+        for id in range(len(sub_names)):
+            if sub_names[id] != "eyes":
+                continue
+            attention = True
 
         return(attention)
 
@@ -104,23 +103,24 @@ class MinimalSubscriber(Node):
         boxes = detections.xyxy.astype(int)
 
         if self.start_delay > 2:
-            print("## DETECTIONS ##")
             for id in range(len(names)):
                 if names[id] != "person":
                     continue
-
-                print(names[id])
-
                 x = [int(boxes[id,0]), int(boxes[id,2])]
                 y = [int(boxes[id,1]), int(boxes[id,3])]
 
-                eye_detectioin = self.eye_detectioin(cv2Image, x, y)            
-                self.publish_attention.publish(eye_detectioin)
-                self.publish_box.publush(x, y)
-        
-    
-
-
+                eye_detectioin = self.eye_detectioin(cv2Image, x, y)
+                if eye_detectioin == True:
+                    self.publish_attention.publish(eye_detectioin)
+                    self.not_seen=0
+                else:
+                    self.not_seen += 1
+                    if self.not_seen >= self.missed_frames:
+                        self.publish_attention.publish(eye_detectioin)
+                        self.not_seen = self.missed_frames
+                
+                self.publish_box.publish([x, y])
+                #self.publish_box.publish([x[0], y[0]],[x[1],y[1]])
         else:
             self.start_delay += 1
 
