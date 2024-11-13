@@ -9,7 +9,9 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
       # Uncomment this if required
-      # - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - UID=1000
+      - GID=1000
     devices:
       - /dev/video0:/dev/video0
     volumes:
@@ -35,6 +37,8 @@ services:
       - ACCEPT_EULA=Y
       - PRIVACY_CONSENT=Y
       - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - UID=1000
+      - GID=1000
     volumes:
       - ~/docker/isaac-sim/cache/kit:/isaac-sim/kit/cache:rw
       - ~/docker/isaac-sim/cache/ov:/root/.cache/ov:rw

@@ -24,15 +24,8 @@ while True:
     if not ret:
         break
 
-<<<<<<< HEAD
     results = model.infer(frame, confidence=0.002)
-=======
-<<<<<<< HEAD
-    results = model.infer(frame, confidence=0.002, )
-=======
-    results = model.infer(frame, confidence=0.002)
->>>>>>> origin/fine_tune_hand_guestures
->>>>>>> db6c6324138a7ba00265d32bf682105d983d09ab
+
     detections = sv.Detections.from_inference(results).with_nms(threshold=0.1)
 
     annotated_image = frame.copy()
