@@ -20,10 +20,15 @@ from std_msgs.msg import Bool, Int32MultiArray
 BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
 
-# New branch BABY!
+# __detector = "yolo-world"
+# model = []
 
-model = YOLO("yolo11s.pt")
-
+# if __detector == "yolo11":
+#     model = YOLO("yolo11s.pt")
+# elif __detector == "yolo-world":
+model = YOLOWorld(model_id="yolo_world/l")
+classes = ["person","eyes"]
+model.set_classes(classes)
 
 
 class MinimalSubscriber(Node):
@@ -45,7 +50,7 @@ class MinimalSubscriber(Node):
         self.publish_box = self.create_publisher(Int32MultiArray, '/box', 10)
         self.publish_attention = self.create_publisher(Bool, '/attention', 10)
 
-        self.tf_broadcaster = TransformBroadcaster(self)
+        # self.tf_broadcaster = TransformBroadcaster(self)
 
         self.start_delay = 0
         self.sub_delay = 0
@@ -72,22 +77,32 @@ class MinimalSubscriber(Node):
         image = img
         sub_image = image[y_min : y_max, x_min : x_max]
 
-        sub_results = model(sub_image)
-        detections = sv.Detections.from_ultralytics(sub_results[0]).with_nms(threshold=0.05)
+        # sub_results = model(sub_image)
+
+        # detections = []
+
+        # if __detector == "yolo11":
+        #     detections = sv.Detections.from_ultralytics(sub_results[0]).with_nms(threshold=0.05)
+        # elif __detector == "yolo-world":
+
+        # detections = sv.Detections.from_inference(sub_results[0]).with_nms(threshold=0.05)
+
+        sub_results = model.infer(sub_image, confidence=0.001)
+        detections = sv.Detections.from_inference(sub_results).with_nms(threshold=0.05)
+
+        sub_image = BOUNDING_BOX_ANNOTATOR.annotate(sub_image, detections)
+        sub_image = LABEL_ANNOTATOR.annotate(sub_image, detections)
+
+        cv2.imshow("Eyes", sub_image)
+        
+        
         sub_names = detections.data['class_name']
 
-        self.get_logger().debug("Here it comes...")
-
-        # print("Here it comes...")
-        attention = False
 
         for id in range(len(sub_names)):
-            if sub_names[id] != "eyes":
-                continue
-            attention = True
-
-        self.get_logger().debug(attention)
-        return(attention)
+            if sub_names[id] == "eyes":
+                return(True)
+        return(False)
 
         
 
@@ -98,9 +113,18 @@ class MinimalSubscriber(Node):
         cv2Image = self.br.imgmsg_to_cv2(img)
         cv2Image = cv2.cvtColor(cv2Image, cv2.COLOR_BGR2RGB)
 
-        results = model(cv2Image)
+        # results = model(cv2Image)
 
-        detections = sv.Detections.from_ultralytics(results[0]).with_nms(threshold=0.5)
+        # detections = []
+
+        # if __detector == "yolo11":
+        #     detections = sv.Detections.from_ultralytics(results[0]).with_nms(threshold=0.05)
+        # elif __detector == "yolo-world":
+
+        # detections = sv.Detections.from_inference(results[0]).with_nms(threshold=0.05)
+
+        results = model.infer(cv2Image, confidence=0.8)
+        detections = sv.Detections.from_inference(results).with_nms(threshold=0.5)
 
 
         names = detections.data['class_name']
@@ -142,7 +166,7 @@ class MinimalSubscriber(Node):
 
         # self.get_logger().info("Here it comes...")
 
-        cv2.imshow("YOLO11", annotated_image)
+        cv2.imshow("Person", annotated_image)
         cv2.waitKey(1)
 
 

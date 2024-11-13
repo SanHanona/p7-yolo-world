@@ -23,7 +23,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'JohnsFunciton = vision.image_subscriber:main', 
+            'image_subscriber = vision.image_subscriber:main', 
             'yolo11_subscriber = vision.yolo11_subscriber:main',
             'rgb_subscriber = vision.rgb_subscriber:main',
             'depth_subscriber = vision.depth_subscriber:main'
