@@ -42,8 +42,8 @@ class MinimalSubscriber(Node):
             self.rgb_callback,
             qos_policy)
         
-        self.publish_box = self.create_publisher(Int32MultiArray, 'box', 10)
-        self.publish_attention = self.create_publisher(Bool, 'attention', 10)
+        self.publish_box = self.create_publisher(Int32MultiArray, '/box', 10)
+        self.publish_attention = self.create_publisher(Bool, '/attention', 10)
 
         self.tf_broadcaster = TransformBroadcaster(self)
 
@@ -76,6 +76,9 @@ class MinimalSubscriber(Node):
         detections = sv.Detections.from_ultralytics(sub_results[0]).with_nms(threshold=0.05)
         sub_names = detections.data['class_name']
 
+        self.get_logger().debug("Here it comes...")
+
+        # print("Here it comes...")
         attention = False
 
         for id in range(len(sub_names)):
@@ -83,6 +86,7 @@ class MinimalSubscriber(Node):
                 continue
             attention = True
 
+        self.get_logger().debug(attention)
         return(attention)
 
         
@@ -103,24 +107,29 @@ class MinimalSubscriber(Node):
         boxes = detections.xyxy.astype(int)
 
         if self.start_delay > 2:
+            array_msg = [[0,0,0,0]]
             for id in range(len(names)):
                 if names[id] != "person":
                     continue
                 x = [int(boxes[id,0]), int(boxes[id,2])]
                 y = [int(boxes[id,1]), int(boxes[id,3])]
 
-                eye_detectioin = self.eye_detectioin(cv2Image, x, y)
-                if eye_detectioin == True:
-                    self.publish_attention.publish(eye_detectioin)
+                eye_detection = self.eye_detection(cv2Image, x, y)
+                if eye_detection == True:
+                    self.publish_attention.publish(Bool(data=True))
                     self.not_seen=0
                 else:
                     self.not_seen += 1
                     if self.not_seen >= self.missed_frames:
-                        self.publish_attention.publish(eye_detectioin)
+                        self.publish_attention.publish(Bool(data=False))
                         self.not_seen = self.missed_frames
+
+                # array_msg = [array_msg, [x[0],x[1],y[0],y[1]]]
+                array_msg = [x[0],x[1],y[0],y[1]]
                 
-                self.publish_box.publish([x, y])
-                #self.publish_box.publish([x[0], y[0]],[x[1],y[1]])
+                self.publish_box.publish(Int32MultiArray(data=array_msg))
+
+            #self.publish_box.publish([x[0], y[0]],[x[1],y[1]])
         else:
             self.start_delay += 1
 
@@ -130,6 +139,8 @@ class MinimalSubscriber(Node):
         annotated_image = LABEL_ANNOTATOR.annotate(annotated_image, detections)
 
         annotated_image = cv2.resize(annotated_image,(1280,720))
+
+        # self.get_logger().info("Here it comes...")
 
         cv2.imshow("YOLO11", annotated_image)
         cv2.waitKey(1)

@@ -28,7 +28,7 @@ class DepthSubscriber(Node):
         
         self.box_subscription = self.create_subscription(
             Int32MultiArray,
-            'box',
+            '/box',
             self.box_callback,
             10)
         
@@ -54,31 +54,40 @@ class DepthSubscriber(Node):
         cv2Image = self.br.imgmsg_to_cv2(img)
         self.depth = cv2.cvtColor(cv2Image, cv2.COLOR_BGR2RGB)
 
+        self.d_flag = True
+
         self.combine()
 
 
     def box_callback(self, box_msg):
-        self.boxes = box_msg
-        print(self.box)
+        self.boxes = box_msg.data
+        print(self.boxes)
+        
+        self.b_flag = True
 
         self.combine()
 
 
     def combine(self):
         if self.d_flag and self.b_flag:
+            # self.get_logger().info("Here it comes...")
+            self.b_flag = False
+            self.d_flag = False
             self.locate_object()
 
 
     def locate_object(self):
 
         depth_rect = self.depth.copy()
-        depth_rect = np.divide(depth_rect,10)
+        depth_rect = np.divide(depth_rect,20)
 
-        id = 0
-        for box in self.boxes:
+        
+        for id in range(len(self.boxes)):
 
-            x = [int(box[0]), int(box[2])]
-            y = [int(box[1]), int(box[3])]
+            box = self.boxes
+
+            x = [box[0], box[1]]
+            y = [box[2], box[3]]
 
             depth_rect = cv2.rectangle(depth_rect, (x[0],y[0]), (x[1],y[1]), (255,0,255), 2)
             depth_cut = self.depth[y[0]:y[1], x[0]:x[1]]
@@ -108,8 +117,6 @@ class DepthSubscriber(Node):
 
             cv2.imshow("Depth", depth_rect)
             cv2.waitKey(1)
-
-            id += 1
 
     
     

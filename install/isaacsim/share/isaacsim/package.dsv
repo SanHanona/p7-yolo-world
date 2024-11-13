@@ -1,0 +1,4 @@
+source;share/isaacsim/local_setup.bash
+source;share/isaacsim/local_setup.dsv
+source;share/isaacsim/local_setup.sh
+source;share/isaacsim/local_setup.zsh

@@ -1,0 +1,4 @@
+source;share/carter_navigation/local_setup.bash
+source;share/carter_navigation/local_setup.dsv
+source;share/carter_navigation/local_setup.sh
+source;share/carter_navigation/local_setup.zsh

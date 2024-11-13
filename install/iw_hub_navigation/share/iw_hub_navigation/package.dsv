@@ -1,0 +1,4 @@
+source;share/iw_hub_navigation/local_setup.bash
+source;share/iw_hub_navigation/local_setup.dsv
+source;share/iw_hub_navigation/local_setup.sh
+source;share/iw_hub_navigation/local_setup.zsh

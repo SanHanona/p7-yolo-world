@@ -7,4 +7,8 @@ def generate_launch_description():
             package='vision',
             executable='rgb_subscriber',
             name='rgb_subscriber'),
+        launch_ros.actions.Node(
+            package='vision',
+            executable='depth_subscriber',
+            name='depth_subscriber')
   ])
