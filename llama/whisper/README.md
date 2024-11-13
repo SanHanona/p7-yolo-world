@@ -40,7 +40,10 @@ To run on the AAUlab run
 ```
 python3 transcribe_demo.py --default_microphone "hw:1,7"
 ```
-
+To run on the ambolt-vision run
+```
+python3 transcribe_demo.py --default_microphone 'hw:2,0'
+```
 
 Available models are : ` 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large-v3', 'large', 'large-v3-turbo', 'turbo' `
 
