@@ -35,6 +35,7 @@ class MinimalSubscriber(Node):
 
     def __init__(self):
         super().__init__('human_attention')
+        self.get_logger().info("rgb subscriber node initialized.")
         self.br = CvBridge()
 
         qos_policy = rclpy.qos.QoSProfile(reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,

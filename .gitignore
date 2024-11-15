@@ -119,6 +119,7 @@ mmdet/.mim
 
 # Pytorch
 *.pth
+*.pt
 *.py~
 *.sh~
 

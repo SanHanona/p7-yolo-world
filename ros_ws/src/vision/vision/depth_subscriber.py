@@ -3,7 +3,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from rclpy.qos import qos_profile_sensor_data
 
-from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Int32MultiArray, Float32
 
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
@@ -14,7 +14,8 @@ import numpy as np
 
 class DepthSubscriber(Node):
     def __init__(self):
-        super().__init__('yolo11_subscriber')
+        super().__init__('depth_subscriber')
+        self.get_logger().info("Depth subscriber node initialized.")
         self.br = CvBridge()
 
         qos_policy = rclpy.qos.QoSProfile(reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
@@ -31,6 +32,8 @@ class DepthSubscriber(Node):
             '/box',
             self.box_callback,
             10)
+        
+        self.publish_distance = self.create_publisher(Float32, '/distance', 10)
         
         self.tf_broadcaster = TransformBroadcaster(self)
 
@@ -114,6 +117,8 @@ class DepthSubscriber(Node):
             Z = obj_depth
             X = ((obj_x-cx)*Z)/(self.camera['fStop']*2)
             # Y = ((obj_y-cy)*Z)/self.camera['fLeng']
+
+            self.publish_distance.publish(Float32(data=float(obj_depth)))
 
             cv2.imshow("Depth", depth_rect)
             cv2.waitKey(1)

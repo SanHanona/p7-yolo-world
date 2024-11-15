@@ -1,0 +1,58 @@
+traning folder: runs/detect
+
+train1 to train7 -> useless, delete 
+
+trai8 (small model): conclusion: ...
+epochs=5, lr0=0.001, weight_decay=0.0005
+model="yolov8s-worldv2.pt", data="./geature_data.yaml", epochs=5, batch=4, imgsz=640, 
+            lr0=0.001, optimizer='SGD', weight_decay=0.0005, momentum=0.932,
+            mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
+
+
+trai9 (small model): conclusion: ...
+epochs=10, lr0=0.001, weight_decay=0.0005
+model="yolov8s-worldv2.pt", data="./geature_data.yaml", epochs=10, batch=4, imgsz=640, 
+            lr0=0.001, optimizer='SGD', weight_decay=0.0005, momentum=0.932,
+            mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
+
+
+trai10 (small model): conclusion: ...
+epochs=10, lr0=0.01, weight_decay=0.005
+model="yolov8s-worldv2.pt", data="./geature_data.yaml", epochs=10, batch=4, imgsz=640, 
+            lr0=0.01, optimizer='SGD', weight_decay=0.005, momentum=0.932,
+            mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
+
+
+trai11 (small model): conclusion: ...
+epochs=5, lr0=0.01, weight_decay=0.005
+model="yolov8s-worldv2.pt", data="./geature_data.yaml", epochs=5, batch=4, imgsz=640, 
+            lr0=0.01, optimizer='SGD', weight_decay=0.005, momentum=0.932,
+            mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
+
+
+trai12 (large model): conclusion: ...
+epochs=5, lr0=0.01, weight_decay=0.005
+model="yolov8l-worldv2.pt", data="./geature_data.yaml", epochs=5, batch=4, imgsz=640, 
+            lr0=0.01, optimizer='SGD', weight_decay=0.005, momentum=0.932,
+            mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
+
+
+trai13 (large model): conclusion: ...
+epochs=10, lr0=0.01, weight_decay=0.005
+model="yolov8l-worldv2.pt", data="./geature_data.yaml", epochs=10, batch=4, imgsz=640, 
+            lr0=0.01, optimizer='SGD', weight_decay=0.005, momentum=0.932,
+            mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
+
+
+trai14 (large model): conclusion: ...
+epochs=10, lr0=0.001, weight_decay=0.0005
+model="yolov8l-worldv2.pt", data="./geature_data.yaml", epochs=10, batch=4, imgsz=640, 
+            lr0=0.001, optimizer='SGD', weight_decay=0.0005, momentum=0.932,
+            mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
+
+
+trai15 (large model): conclusion: ...
+epochs=5, lr0=0.001, weight_decay=0.0005
+model="yolov8l-worldv2.pt", data="./geature_data.yaml", epochs=5, batch=4, imgsz=640, 
+            lr0=0.001, optimizer='SGD', weight_decay=0.0005, momentum=0.932,
+            mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0

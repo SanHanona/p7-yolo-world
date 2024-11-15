@@ -2,22 +2,22 @@ import cv2
 import supervision as sv
 
 from tqdm import tqdm
-from inference.models.yolo_world.yolo_world import YOLOWorld
+from ultralytics import YOLOWorld
 
 import os
 HOME = os.getcwd()
 print(HOME)
 
-SOURCE_IMAGE_PATH = f"data/dog.jpeg"
+SOURCE_IMAGE_PATH = f"data/ining-and-complaining-standing-disappointed-against-white-background-2GGMYFA_jpg.rf.35e13df2553e5f2450f0bea09ee3a9b5.jpg"
 
-model = YOLOWorld(model_id="yolo_world/l")
+model = YOLOWorld("../data/hand_gestures_v6i.yolov5pytorch/runs/detect/train13/weights/last.pt") 
 
-classes = ["person", "backpack", "dog", "eye", "nose", "ear", "tongue"]
+classes = ["stop", "Thumbs up"]
 model.set_classes(classes)
 
 image = cv2.imread(SOURCE_IMAGE_PATH)
-results = model.infer(image)
-detections = sv.Detections.from_inference(results)
+results = model.predict(image, conf=0.1, iou=0.1)
+detections = sv.Detections.from_ultralytics(results[0]).with_nms(threshold=0.1)
 
 BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)

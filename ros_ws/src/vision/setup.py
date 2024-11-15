@@ -26,7 +26,9 @@ setup(
             'image_subscriber = vision.image_subscriber:main', 
             'yolo11_subscriber = vision.yolo11_subscriber:main',
             'rgb_subscriber = vision.rgb_subscriber:main',
-            'depth_subscriber = vision.depth_subscriber:main'
+            'depth_subscriber = vision.depth_subscriber:main',
+            'action_decision = vision.action_decision:main', 
+            'gesture_handler = vision.gesture_handler:main'
         ],
     },
 )

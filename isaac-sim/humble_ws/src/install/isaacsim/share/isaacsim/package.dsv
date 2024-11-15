@@ -1,0 +1,8 @@
+source;share/isaacsim/hook/cmake_prefix_path.ps1
+source;share/isaacsim/hook/cmake_prefix_path.dsv
+source;share/isaacsim/hook/cmake_prefix_path.sh
+source;share/isaacsim/local_setup.bash
+source;share/isaacsim/local_setup.dsv
+source;share/isaacsim/local_setup.ps1
+source;share/isaacsim/local_setup.sh
+source;share/isaacsim/local_setup.zsh

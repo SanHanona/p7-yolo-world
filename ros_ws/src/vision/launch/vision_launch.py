@@ -10,5 +10,13 @@ def generate_launch_description():
         launch_ros.actions.Node(
             package='vision',
             executable='depth_subscriber',
-            name='depth_subscriber')
+            name='depth_subscriber'),
+        launch_ros.actions.Node(
+            package='vision',
+            executable='action_decision',
+            name='action_decision'),
+        launch_ros.actions.Node(
+            package='vision',
+            executable='gesture_handler',
+            name='gesture_handler')
   ])

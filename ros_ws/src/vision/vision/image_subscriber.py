@@ -64,6 +64,7 @@ class MinimalSubscriber(Node):
 
     def __init__(self):
         super().__init__('image_subscriber')
+        self.get_logger().info("Image subscriber node initialized.")
         self.br = CvBridge()
 
         qos_policy = rclpy.qos.QoSProfile(reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
