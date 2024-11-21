@@ -123,7 +123,7 @@ def read_input():
 
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    ssh_client.connect('100.108.187.72', username='yabde', password='Ilyacine3')
+    ssh_client.connect('', username='', password='')
 
     sftp_client = ssh_client.open_sftp()
     remote_file = sftp_client.open('D:\Bureau\TC\AAU\PBL\PBL_code\whisper_real_time\last_sentence.txt')
