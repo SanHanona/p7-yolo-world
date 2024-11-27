@@ -15,7 +15,7 @@ import numpy as np
 
 from tqdm import tqdm
 from inference.models.yolo_world.yolo_world import YOLOWorld
-from std_msgs.msg import Bool, Int32MultiArray
+from std_msgs.msg import Bool, Int32MultiArray, Float32
 
 BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
@@ -26,7 +26,7 @@ LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=s
 # if __detector == "yolo11":
 #     model = YOLO("yolo11s.pt")
 # elif __detector == "yolo-world":
-model = YOLOWorld(model_id="yolo_world/l")
+model = YOLOWorld(model_id="yolo_world/l") 
 classes = ["person","eyes"]
 model.set_classes(classes)
 
@@ -47,7 +47,15 @@ class MinimalSubscriber(Node):
             '/front_stereo_camera/left/image_raw',
             self.rgb_callback,
             qos_policy)
+
+        self.dist_subscription = self.create_subscription(
+            Float32,
+            '/distance',
+            self.distance_callback,
+            10)
         
+        safety_distance_threshold = 3 
+
         self.publish_box = self.create_publisher(Int32MultiArray, '/box', 10)
         self.publish_attention = self.create_publisher(Bool, '/attention', 10)
 
@@ -67,6 +75,11 @@ class MinimalSubscriber(Node):
                        'frameW': 1280,
                        'frameH': 720}
         
+
+    def distance_callback(self, msg):
+        self.distance = msg.data
+        self.get_logger().info(f"Distance received: {self.distance}")
+
 
     def eye_detection(self, img, x, y):
 
@@ -105,10 +118,6 @@ class MinimalSubscriber(Node):
                 return(True)
         return(False)
 
-        
-
-
-
 
     def rgb_callback(self, img):
         cv2Image = self.br.imgmsg_to_cv2(img)
@@ -139,10 +148,11 @@ class MinimalSubscriber(Node):
                 x = [int(boxes[id,0]), int(boxes[id,2])]
                 y = [int(boxes[id,1]), int(boxes[id,3])]
 
-                eye_detection = self.eye_detection(cv2Image, x, y)
-                if eye_detection == True:
-                    self.publish_attention.publish(Bool(data=True))
-                    self.not_seen=0
+                if self.distance <= safety_distance_threshold
+                    eye_detection = self.eye_detection(cv2Image, x, y)
+                    if eye_detection == True:
+                        self.publish_attention.publish(Bool(data=True))
+                        self.not_seen=0
                 else:
                     self.not_seen += 1
                     if self.not_seen >= self.missed_frames:
