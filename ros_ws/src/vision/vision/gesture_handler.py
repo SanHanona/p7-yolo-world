@@ -15,7 +15,7 @@ BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
 
 # model = YOLOWorld("../../../../data/hand_gestures_v6i.yolov5pytorch/runs/detect/train10/weights/last.pt") # might need to test the others 
-model = YOLOWorld("/yolo/data/hand_gestures_v6i.yolov5pytorch/runs/detect/train10/weights/last.pt") # might need to test the others 
+model = YOLOWorld("/yolo/data/hand_gestures_v6i.yolov5pytorch/runs/detect/train13/weights/last.pt") # might need to test the others 
 
 classes = ["stop", "Thumbs up"]
 model.set_classes(classes)
@@ -43,7 +43,7 @@ class Gesture(Node):
         # Stability mechanism
         self.last_published_gesture = None
         self.detection_counter = 0
-        self.stability_threshold = 5  # tune if needed 
+        self.stability_threshold = 3  # tune if needed 
         self.current_gesture = None
 
     def initialize_camera(self): 
@@ -52,7 +52,6 @@ class Gesture(Node):
         if not cap.isOpened():
             print("Error: Could not open webcam.")
             exit()
-        frame_count = 0 #might not be needed 
         return cap
 
     @staticmethod
@@ -67,15 +66,15 @@ class Gesture(Node):
     def attention_callback(self, attention):
         # If attention is true, subscribe to the box topic
         if attention.data: 
-            self.get_logger().info("Attention detected. Subscribing to /box topic for gesture detection.")
-            self.box_subscriber = self.create_subscription(
+            self.get_logger().info("Attention detected")
+            '''self.box_subscriber = self.create_subscription(
                 Int32MultiArray,
                 '/box',
                 self.gesture_callback,
-                qos_profile_sensor_data) 
+                qos_profile_sensor_data) '''
+            self.gesture_callback()
 
-
-    def gesture_callback(self, box): 
+    def gesture_callback(self): 
         self.get_logger().info("Gesture callback triggered.")
 
         # Process image data
@@ -102,7 +101,7 @@ class Gesture(Node):
     def run_detection(self, image, conf=0.2, iou=0.1, threshold=0.1):
         self.get_logger().info("Running gesture detection model.")
 
-        results = model.predict(image, conf, iou)
+        results = model.predict(image)
         detections = sv.Detections.from_ultralytics(results[0]).with_nms(threshold)
         return detections
 
@@ -118,7 +117,7 @@ class Gesture(Node):
         if self.detection_counter >= self.stability_threshold: #and detected_gesture != self.last_published_gesture:
             # self.last_published_gesture = detected_gesture
             self.gesture_publisher.publish(String(data=detected_gesture))
-            self.get_logger().info(f"Gesture detected: {detected_gesture}")
+            self.get_logger().info(f"Gesture detected - publishing: {detected_gesture}")
 
 
     def display_annotated_image(self, image, detections):
