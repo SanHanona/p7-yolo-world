@@ -148,7 +148,7 @@ class MinimalSubscriber(Node):
                 x = [int(boxes[id,0]), int(boxes[id,2])]
                 y = [int(boxes[id,1]), int(boxes[id,3])]
 
-                if self.distance <= safety_distance_threshold
+                if self.distance <= safety_distance_threshold:
                     eye_detection = self.eye_detection(cv2Image, x, y)
                     if eye_detection == True:
                         self.publish_attention.publish(Bool(data=True))
