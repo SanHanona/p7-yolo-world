@@ -38,12 +38,22 @@ class Gesture(Node):
 
         self.gesture_publisher = self.create_publisher(String, '/command/gesture', 10) 
 
+        self.cap = self.initialize_camera()
+
         # Stability mechanism
         self.last_published_gesture = None
         self.detection_counter = 0
         self.stability_threshold = 5  # tune if needed 
         self.current_gesture = None
 
+    def initialize_camera(self): 
+        #webcam
+        cap = cv2.VideoCapture(0) # edit if another cam i needed 
+        if not cap.isOpened():
+            print("Error: Could not open webcam.")
+            exit()
+        frame_count = 0 #might not be needed 
+        return cap
 
     @staticmethod
     def process_int_array_to_image(box_data, width=1280, height=720):
@@ -69,10 +79,15 @@ class Gesture(Node):
         self.get_logger().info("Gesture callback triggered.")
 
         # Process image data
-        image = process_int_array_to_image(box.data)
-        if image is None:
-            self.get_logger().error("Array size does not match image dimensions.")
-            return
+        # image = process_int_array_to_image(box.data)
+        # if image is None:
+        #     self.get_logger().error("Array size does not match image dimensions.")
+        #     return
+        
+        ret, image = self.cap.read()
+        if not ret:
+            self.get_logger().error("Failed to capture image.")
+            return 
 
         # Run detection
         detections = self.run_detection(image, conf=0.2, iou=0.1, threshold=0.1) # tune paramters
@@ -126,6 +141,10 @@ def main(args=None):
 
     gesture_publisher.destroy_node()
     rclpy.shutdown()
+
+    # When everything is done, release the capture - not sure if it should be here 
+    cap.release()
+    cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     main()
