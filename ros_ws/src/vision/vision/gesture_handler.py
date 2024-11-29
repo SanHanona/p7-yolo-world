@@ -15,7 +15,7 @@ BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
 
 # model = YOLOWorld("../../../../data/hand_gestures_v6i.yolov5pytorch/runs/detect/train10/weights/last.pt") # might need to test the others 
-model = YOLOWorld("/yolo/data/hand_gestures_v6i.yolov5pytorch/runs/detect/train10/weights/last.pt") # might need to test the others 
+model = YOLOWorld("/yolo/data/hand_gestures_v6i.yolov5pytorch/runs/detect/train13/weights/last.pt") # might need to test the others 
 
 classes = ["stop", "Thumbs up"]
 model.set_classes(classes)
@@ -26,10 +26,6 @@ class Gesture(Node):
         super().__init__('gesture')
         self.get_logger().info("Gesture detection node initialized.")
 
-        qos_policy = rclpy.qos.QoSProfile(reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
-                                          history=rclpy.qos.HistoryPolicy.KEEP_LAST,
-                                          depth=1)
-
         self.attention_subscriber = self.create_subscription(
             Bool,
             '/attention',
@@ -38,12 +34,21 @@ class Gesture(Node):
 
         self.gesture_publisher = self.create_publisher(String, '/command/gesture', 10) 
 
+        self.cap = self.initialize_camera()
+
         # Stability mechanism
         self.last_published_gesture = None
         self.detection_counter = 0
-        self.stability_threshold = 5  # tune if needed 
+        self.stability_threshold = 3  # tune if needed 
         self.current_gesture = None
 
+    def initialize_camera(self): 
+        #webcam
+        cap = cv2.VideoCapture(0) # edit if another cam i needed 
+        if not cap.isOpened():
+            print("Error: Could not open webcam.")
+            exit()
+        return cap
 
     @staticmethod
     def process_int_array_to_image(box_data, width=1280, height=720):
@@ -57,22 +62,27 @@ class Gesture(Node):
     def attention_callback(self, attention):
         # If attention is true, subscribe to the box topic
         if attention.data: 
-            self.get_logger().info("Attention detected. Subscribing to /box topic for gesture detection.")
-            self.box_subscriber = self.create_subscription(
+            self.get_logger().info("Attention detected")
+            '''self.box_subscriber = self.create_subscription(
                 Int32MultiArray,
                 '/box',
                 self.gesture_callback,
-                qos_profile_sensor_data) 
+                qos_profile_sensor_data) '''
+            self.gesture_callback()
 
-
-    def gesture_callback(self, box): 
+    def gesture_callback(self): 
         self.get_logger().info("Gesture callback triggered.")
 
         # Process image data
-        image = process_int_array_to_image(box.data)
-        if image is None:
-            self.get_logger().error("Array size does not match image dimensions.")
-            return
+        # image = process_int_array_to_image(box.data)
+        # if image is None:
+        #     self.get_logger().error("Array size does not match image dimensions.")
+        #     return
+        
+        ret, image = self.cap.read()
+        if not ret:
+            self.get_logger().error("Failed to capture image.")
+            return 
 
         # Run detection
         detections = self.run_detection(image, conf=0.2, iou=0.1, threshold=0.1) # tune paramters
@@ -87,7 +97,7 @@ class Gesture(Node):
     def run_detection(self, image, conf=0.2, iou=0.1, threshold=0.1):
         self.get_logger().info("Running gesture detection model.")
 
-        results = model.predict(image, conf, iou)
+        results = model.predict(image)
         detections = sv.Detections.from_ultralytics(results[0]).with_nms(threshold)
         return detections
 
@@ -103,7 +113,7 @@ class Gesture(Node):
         if self.detection_counter >= self.stability_threshold: #and detected_gesture != self.last_published_gesture:
             # self.last_published_gesture = detected_gesture
             self.gesture_publisher.publish(String(data=detected_gesture))
-            self.get_logger().info(f"Gesture detected: {detected_gesture}")
+            self.get_logger().info(f"Gesture detected - publishing: {detected_gesture}")
 
 
     def display_annotated_image(self, image, detections):
@@ -126,6 +136,10 @@ def main(args=None):
 
     gesture_publisher.destroy_node()
     rclpy.shutdown()
+
+    # When everything is done, release the capture - not sure if it should be here 
+    cap.release()
+    cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     main()

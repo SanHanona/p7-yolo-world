@@ -16,7 +16,7 @@ model="yolov8s-worldv2.pt", data="./geature_data.yaml", epochs=10, batch=4, imgs
             mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
 
 
-trai10 (small model): conclusion: ...
+trai10 (small model): conclusion: usefull
 epochs=10, lr0=0.01, weight_decay=0.005
 model="yolov8s-worldv2.pt", data="./geature_data.yaml", epochs=10, batch=4, imgsz=640, 
             lr0=0.01, optimizer='SGD', weight_decay=0.005, momentum=0.932,
@@ -30,14 +30,14 @@ model="yolov8s-worldv2.pt", data="./geature_data.yaml", epochs=5, batch=4, imgsz
             mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
 
 
-trai12 (large model): conclusion: ...
+trai12 (large model): conclusion: usefull <--- should try this one. train13 might be overfitted 
 epochs=5, lr0=0.01, weight_decay=0.005
 model="yolov8l-worldv2.pt", data="./geature_data.yaml", epochs=5, batch=4, imgsz=640, 
             lr0=0.01, optimizer='SGD', weight_decay=0.005, momentum=0.932,
             mosaic=1.0, save_period=1, patience=5, device=0, val=True, plots=True, workers=0
 
 
-trai13 (large model): conclusion: ...
+trai13 (large model): conclusion: default for now (V)
 epochs=10, lr0=0.01, weight_decay=0.005
 model="yolov8l-worldv2.pt", data="./geature_data.yaml", epochs=10, batch=4, imgsz=640, 
             lr0=0.01, optimizer='SGD', weight_decay=0.005, momentum=0.932,

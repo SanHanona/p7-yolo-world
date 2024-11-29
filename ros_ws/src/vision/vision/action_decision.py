@@ -4,6 +4,7 @@ from std_msgs.msg import String, Float32
 
 # ros2 topic pub -1 /command/gesture std_msgs/msg/String "{data: 'stop'}"
 
+'''THIS ONE IS DEPRECATED - USE -"-_timestamped'''
 
 class ActionDecision(Node):
     def __init__(self):
