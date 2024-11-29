@@ -28,7 +28,8 @@ setup(
             'rgb_subscriber = vision.rgb_subscriber:main',
             'depth_subscriber = vision.depth_subscriber:main',
             'action_decision = vision.action_decision:main', 
-            'gesture_handler = vision.gesture_handler:main'
+            'gesture_handler = vision.gesture_handler:main',
+            'nav_to_pose = vision.nav_to_pose:main'
         ],
     },
 )

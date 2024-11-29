@@ -3,7 +3,7 @@ from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 import time
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Bool, Int32MultiArray, String
+from std_msgs.msg import String
 from rclpy.duration import Duration
 
 """
