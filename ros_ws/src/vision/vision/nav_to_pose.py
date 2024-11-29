@@ -15,21 +15,26 @@ class Commander(Node):
         super().__init__('commander')
         self.get_logger().info("Commander node initialized.")
 
+        # Subscribtion to the action command topic for, well... commands
         self.depth_subscription = self.create_subscription(
             String,
             '/command/action',
             self.action_callback,
             10)
         
+        # BasicNavigator comes from the nav2 commander package and is what we use to create and cancel navigation goals
         self.navigator = BasicNavigator()
 
+        # Initialize the timer function that handle the status of ongoing tasks
         self.timer = self.create_timer(0.5, self.timer_callback)
 
+        # Used for tracking whether there is an ongoing navigation task
         self.nav_flag = False
 
+        # Variable for swithcing between the goals
         self.goalnr = 0
 
-        # Set our demo's initial pose
+        # Set our initial pose
         self.initial_pose = PoseStamped()
         self.initial_pose.header.frame_id = 'map'
         self.initial_pose.header.stamp = self.navigator.get_clock().now().to_msg()
@@ -39,10 +44,10 @@ class Commander(Node):
         self.initial_pose.pose.orientation.w = 1.0
         self.navigator.setInitialPose(self.initial_pose)
 
-        # Wait for navigation to fully activate, since autostarting nav2
+        # Wait for navigation to fully activate
         self.navigator.waitUntilNav2Active()
 
-        # Go to our demos first goal pose
+        # Set our first goal pose
         self.goal1_pose = PoseStamped()
         self.goal1_pose.header.frame_id = 'map'
         self.goal1_pose.header.stamp = self.navigator.get_clock().now().to_msg()
@@ -51,6 +56,7 @@ class Commander(Node):
         self.goal1_pose.pose.orientation.w = 1.0
         self.goal1_pose.pose.orientation.z = 0.0
 
+        # Set our second goal pose
         self.goal2_pose = PoseStamped()
         self.goal2_pose.header.frame_id = 'map'
         self.goal2_pose.header.stamp = self.navigator.get_clock().now().to_msg()
@@ -59,15 +65,17 @@ class Commander(Node):
         self.goal2_pose.pose.orientation.w = 1.0
         self.goal2_pose.pose.orientation.z = 0.0
 
-
+    # Runs whenever a commnad is published
     def action_callback(self, msg):
         command = msg.data
         self.get_logger().info("Recived command " + command)
 
+        # If the command is 'stop', cancel the active task
         if command[:4] == 'stop':
             self.nav_flag = False
             self.navigator.cancelTask()
 
+        # If the command is 'wait', cancel the active task, wait for the set time and the reset the goal pose
         if command[:4] == 'wait':
             self.nav_flag = False
             self.navigator.cancelTask()
@@ -77,11 +85,12 @@ class Commander(Node):
             # self.get_logger().info('Waking up!')
             self.set_goalpose()
 
+        # If the command is 'pass', reset the goal pose
         if command[:4] == 'pass':
             self.nav_flag = True
             self.set_goalpose()
 
-
+    # Handles the setting of goal poses, swithcing between the two poses once they are reached
     def set_goalpose(self):
         if self.goalnr == 0:
             path = self.navigator.getPath(self.initial_pose, self.goal1_pose)
@@ -96,9 +105,10 @@ class Commander(Node):
 
             self.navigator.goToPose(self.goal2_pose)
         
-
+    # Handles keeping the status of the running task, and detecting once it has finished
     def timer_callback(self):
         done = False
+        # If navigation is in progress, get and print the ETA from the feedback
         if self.nav_flag:
             feedback = self.navigator.getFeedback()
             if feedback != None:
@@ -110,14 +120,19 @@ class Commander(Node):
                     )
                     + ' seconds.'
                 )
-                # Some navigation timeout to demo cancellation
+                # Automatic cancelaiton after 10 minutes
                 if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600.0):
                     self.navigator.cancelTask()
+                 
+                # If the task is complete, this variable becomes true 
                 done = self.navigator.isTaskComplete()
 
+        # Runs whenerver a task is finished
         if done:
             self.nav_flag = False
             result = self.navigator.getResult()
+
+            # If the task was successful, update the goal number
             if result == TaskResult.SUCCEEDED:
                 self.get_logger().info('Goal succeeded!')
                 if self.goalnr == 0:
@@ -127,12 +142,14 @@ class Commander(Node):
                 elif self.goalnr == 1:
                     self.goalnr = 2
 
+            # If the task failed or was canceled simply print this to the terminal without changing goal number
             elif result == TaskResult.CANCELED:
                 self.get_logger().info('Goal was canceled!')
             elif result == TaskResult.FAILED:
                 self.get_logger().info('Goal failed!')
             else:
                 self.get_logger().info('Goal has an invalid return status!')
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -143,107 +160,3 @@ def main(args=None):
 
     if __name__ == '__main__':
         main()
-
-
-# def main():
-#     rclpy.init()
-
-#     navigator = BasicNavigator()
-
-#     # Set our demo's initial pose
-#     initial_pose = PoseStamped()
-#     initial_pose.header.frame_id = 'map'
-#     initial_pose.header.stamp = navigator.get_clock().now().to_msg()
-#     initial_pose.pose.position.x = -6.0
-#     initial_pose.pose.position.y = 0.0
-#     initial_pose.pose.orientation.z = 3.1415
-#     initial_pose.pose.orientation.w = 1.0
-#     navigator.setInitialPose(initial_pose)
-
-#     # Activate navigation, if not autostarted. This should be called after setInitialPose()
-#     # or this will initialize at the origin of the map and update the costmap with bogus readings.
-#     # If autostart, you should `waitUntilNav2Active()` instead.
-#     # navigator.lifecycleStartup()
-
-#     # Wait for navigation to fully activate, since autostarting nav2
-#     navigator.waitUntilNav2Active()
-
-#     # If desired, you can change or load the map as well
-#     # navigator.changeMap('/path/to/map.yaml')
-
-#     # You may use the navigator to clear or obtain costmaps
-#     # navigator.clearAllCostmaps()  # also have clearLocalCostmap() and clearGlobalCostmap()
-#     # global_costmap = navigator.getGlobalCostmap()
-#     # local_costmap = navigator.getLocalCostmap()
-
-#     # Go to our demos first goal pose
-#     goal1_pose = PoseStamped()
-#     goal1_pose.header.frame_id = 'map'
-#     goal1_pose.header.stamp = navigator.get_clock().now().to_msg()
-#     goal1_pose.pose.position.x = 0.0
-#     goal1_pose.pose.position.y = 15.0
-#     goal1_pose.pose.orientation.w = 1.0
-#     goal1_pose.pose.orientation.z = 0.0
-
-#     goal2_pose = PoseStamped()
-#     goal2_pose.header.frame_id = 'map'
-#     goal2_pose.header.stamp = navigator.get_clock().now().to_msg()
-#     goal2_pose.pose.position.x = 0.0
-#     goal2_pose.pose.position.y = -9.0
-#     goal2_pose.pose.orientation.w = 1.0
-#     goal2_pose.pose.orientation.z = 0.0
-
-#     # sanity check a valid path exists
-#     path = navigator.getPath(initial_pose, goal1_pose)
-
-#     navigator.goToPose(goal1_pose)
-
-#     i = 0
-#     while not navigator.isTaskComplete():
-#         ################################################
-#         #
-#         # Implement some code here for your application!
-#         #
-#         ################################################
-
-#         # Do something with the feedback
-#         i = i + 1
-#         feedback = navigator.getFeedback()
-#         if feedback and i % 5 == 0:
-#             print(
-#                 'Estimated time of arrival: '
-#                 + '{0:.0f}'.format(
-#                     Duration.from_msg(feedback.estimated_time_remaining).nanoseconds
-#                     / 1e9
-#                 )
-#                 + ' seconds.'
-#             )
-
-#             # Some navigation timeout to demo cancellation
-#             if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600.0):
-#                 navigator.cancelTask()
-
-#             # Some navigation request change to demo preemption
-#             if Duration.from_msg(feedback.navigation_time) > Duration(seconds=18.0):
-#                 goal1_pose.pose.position.x = 0.0
-#                 goal1_pose.pose.position.y = 0.0
-#                 navigator.goToPose(goal1_pose)
-
-#     # Do something depending on the return code
-#     result = navigator.getResult()
-#     if result == TaskResult.SUCCEEDED:
-#         print('Goal succeeded!')
-#     elif result == TaskResult.CANCELED:
-#         print('Goal was canceled!')
-#     elif result == TaskResult.FAILED:
-#         print('Goal failed!')
-#     else:
-#         print('Goal has an invalid return status!')
-
-#     navigator.lifecycleShutdown()
-
-#     exit(0)
-
-
-# if __name__ == '__main__':
-#     main()

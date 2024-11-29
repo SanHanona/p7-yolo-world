@@ -26,10 +26,6 @@ class Gesture(Node):
         super().__init__('gesture')
         self.get_logger().info("Gesture detection node initialized.")
 
-        qos_policy = rclpy.qos.QoSProfile(reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
-                                          history=rclpy.qos.HistoryPolicy.KEEP_LAST,
-                                          depth=1)
-
         self.attention_subscriber = self.create_subscription(
             Bool,
             '/attention',
