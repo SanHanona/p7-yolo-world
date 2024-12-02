@@ -25,7 +25,7 @@ def main():
                         help="How much empty space between recordings before we "
                              "consider it a new line in the transcription.", type=float)
     if 'linux' in platform:
-        parser.add_argument("--default_microphone", default='pulse',
+        parser.add_argument("--default_microphone", default='hw:2,0',
                             help="Default microphone name for SpeechRecognition. "
                                  "Run this with 'list' to view available Microphones.", type=str)
     args = parser.parse_args()
