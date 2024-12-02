@@ -54,7 +54,8 @@ class MinimalSubscriber(Node):
             self.distance_callback,
             10)
         
-        safety_distance_threshold = 3 
+        self.distance = 0
+        self.safety_distance_threshold = 5
 
         self.publish_box = self.create_publisher(Int32MultiArray, '/box', 10)
         self.publish_attention = self.create_publisher(Bool, '/attention', 10)
@@ -78,7 +79,7 @@ class MinimalSubscriber(Node):
 
     def distance_callback(self, msg):
         self.distance = msg.data
-        self.get_logger().info(f"Distance received: {self.distance}")
+        # self.get_logger().info(f"Distance received: {self.distance}")
 
 
     def eye_detection(self, img, x, y):
@@ -148,7 +149,7 @@ class MinimalSubscriber(Node):
                 x = [int(boxes[id,0]), int(boxes[id,2])]
                 y = [int(boxes[id,1]), int(boxes[id,3])]
 
-                if self.distance <= safety_distance_threshold:
+                if self.distance <= self.safety_distance_threshold:
                     eye_detection = self.eye_detection(cv2Image, x, y)
                     if eye_detection == True:
                         self.publish_attention.publish(Bool(data=True))

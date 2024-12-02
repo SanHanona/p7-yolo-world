@@ -52,7 +52,7 @@ class ActionDecision(Node):
         # self.safety_distance = None
         # self.last_distance_timestamp = None
 
-        self.command_window = 3.0  # Command validity in seconds
+        self.command_window = 10.0  # Command validity in seconds
         self.wait_time_after_attention_lost = 3.0  # Wait time before deactivating pass_state
 
         self.timer = self.create_timer(1, self.timer_callback)
@@ -60,7 +60,7 @@ class ActionDecision(Node):
     def attention_callback(self, msg):
         self.last_attention_command = msg.data  
         self.last_attention_timestamp = self.get_clock().now()
-        self.get_logger().info(f"Attention state updated: {self.last_attention_command}")
+        # self.get_logger().info(f"Attention state updated: {self.last_attention_command}")
 
     def language_callback(self, msg):
         self.last_language_command = msg.data
@@ -111,7 +111,7 @@ class ActionDecision(Node):
     def handle_pass_state(self, language, gesture, attention, current_time):
         """Manage the pass_state based on commands and attention."""
         # current issue - attention is stored for command window time, which is the same as time_since_last_attention
-        if self.pass_state and attention is None:  
+        if (self.pass_state is True) and (attention is None):  
             time_since_last_attention = (
                 (current_time - self.last_attention_timestamp).nanoseconds / 1e9
                 if self.last_attention_timestamp else float('inf')
@@ -137,18 +137,18 @@ class ActionDecision(Node):
             elif "wait" in {gesture, language}:
                 self.wait_action()
             elif "pass" in {gesture, language} or attention in [True, False]:  # Handles attention True/False explicitly
-                self.publish_action("pass")
+                self.pass_action()
             else:
                 self.get_logger().info("No valid commands or conditions met.")
         elif attention == False:
-            self.stop_action()
-            self.get_logger().info("No valid commands or conditions met.")
+            # self.stop_action()
+            self.get_logger().info("No Attention.")
             self.get_attention()
-        else: 
-            self.get_logger().info("action handler passive")
+        # else: 
+        #     self.get_logger().info("action handler passive")
 
     def get_attention(self): 
-        self.get_logger().info("Trying to get attention of worker")
+        self.get_logger().info("*LOUD BEEP*")
         # Implement LED blink or sound  
 
     # Jonas do you thing in the functions below 

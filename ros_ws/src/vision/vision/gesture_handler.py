@@ -89,9 +89,12 @@ class Gesture(Node):
         detected_classes = detections.data['class_name']  
 
         # Publish and display annotated image
-        if detected_classes and detected_classes[0] in classes: #look for the classes that is detected
-            self.filter_and_publish(detected_classes[0]) 
-            self.display_annotated_image(image, detections)
+        try:
+            if detected_classes in classes: #detected_classes and detected_classes[0] in classes: #look for the classes that is detected
+                self.filter_and_publish(detected_classes[0]) 
+                self.display_annotated_image(image, detections)
+        except:
+            self.get_logger().info(f"Too many gestrures detected")
 
     
     def run_detection(self, image, conf=0.2, iou=0.1, threshold=0.1):
