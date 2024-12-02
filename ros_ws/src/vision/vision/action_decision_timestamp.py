@@ -27,11 +27,11 @@ class ActionDecision(Node):
             self.gesture_callback,
             10)
 
-        # self.dist_subscription = self.create_subscription(
-        #     Float32,
-        #     '/distance',
-        #     self.distance_callback,
-        #     10)
+        self.dist_subscription = self.create_subscription(
+            Float32,
+            '/distance',
+            self.distance_callback,
+            10)
 
         # Publisher
         self.publish_command = self.create_publisher(String, '/command/action', 10)
@@ -49,8 +49,8 @@ class ActionDecision(Node):
         self.pass_state = False
         self.pass_command_count = 0  
 
-        # self.safety_distance = None
-        # self.last_distance_timestamp = None
+        self.safety_distance = None
+        self.last_distance_timestamp = None
 
         self.command_window = 10.0  # Command validity in seconds
         self.wait_time_after_attention_lost = 3.0  # Wait time before deactivating pass_state
@@ -69,19 +69,23 @@ class ActionDecision(Node):
 
     def gesture_callback(self, msg):
         self.last_gesture_command = msg.data
+        if self.last_gesture_command == "Thumbs up":
+            self.last_gesture_command = "pass"
         self.last_gesture_timestamp = self.get_clock().now()
         self.get_logger().info(f"Gesture received: {self.last_gesture_command}")
 
 
-    # def distance_callback(self, msg):
-    #     self.safety_distance = msg.data
-    #     self.last_distance_timestamp = self.get_clock().now()
-    #     self.get_logger().info(f"Distance received: {self.safety_distance}")
-    # def is_distance_within_range(self):
-    #     """Check if the distance is within the stopping range."""
-    #     if self.safety_distance is None or self.last_distance_timestamp is None:
-    #         return False
-    #     return self.safety_distance <= 3 # change if needed 
+    def distance_callback(self, msg):
+        self.safety_distance = msg.data
+        self.last_distance_timestamp = self.get_clock().now()
+        # self.get_logger().info(f"Distance received: {self.safety_distance}")
+
+    def is_distance_within_range(self):
+        """Check if the distance is within the stopping range."""
+        if self.safety_distance is None or self.last_distance_timestamp is None:
+            return False
+        self.get_logger().info(f"Distance check: {self.safety_distance <= 5}")
+        return self.safety_distance <= 5 # change if needed 
 
 
     def timer_callback(self):
@@ -119,6 +123,7 @@ class ActionDecision(Node):
             self.get_logger().info(f"pass state {self.pass_state} - attention is {attention}")
             if time_since_last_attention > self.wait_time_after_attention_lost:
                 self.pass_state = False
+                self.safety_distance = 1000
                 self.get_logger().info("Pass state deactivated due to attention loss.")
         
         if language == "pass" or gesture == "pass":
@@ -131,12 +136,17 @@ class ActionDecision(Node):
 
     def decide_action(self, language, gesture, attention):
         """Decide on the action based on the hierarchy."""
+
+        is_close = self.is_distance_within_range()
+        if is_close and not self.pass_state:
+            self.stop_action()
+
         if attention or self.pass_state:
             if "stop" in {gesture, language}:
                 self.stop_action()
             elif "wait" in {gesture, language}:
                 self.wait_action()
-            elif "pass" in {gesture, language} or attention in [True, False]:  # Handles attention True/False explicitly
+            elif "pass" in {gesture, language}: #or attention in [True, False]:  # Handles attention True/False explicitly
                 self.pass_action()
             else:
                 self.get_logger().info("No valid commands or conditions met.")

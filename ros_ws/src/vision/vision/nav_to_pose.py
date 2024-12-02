@@ -127,14 +127,16 @@ class Commander(Node):
                 # If the task is complete, this variable becomes true 
                 done = self.navigator.isTaskComplete()
 
+
         # Runs whenerver a task is finished
         if done:
-            self.nav_flag = False
+            
             result = self.navigator.getResult()
 
             # If the task was successful, update the goal number
             if result == TaskResult.SUCCEEDED:
                 self.get_logger().info('Goal succeeded!')
+                self.nav_flag = False
                 if self.goalnr == 0:
                     self.goalnr = 2
                 elif self.goalnr == 2:
@@ -145,8 +147,10 @@ class Commander(Node):
             # If the task failed or was canceled simply print this to the terminal without changing goal number
             elif result == TaskResult.CANCELED:
                 self.get_logger().info('Goal was canceled!')
+                self.nav_flag = False
             elif result == TaskResult.FAILED:
                 self.get_logger().info('Goal failed!')
+                self.nav_flag = False
             else:
                 self.get_logger().info('Goal has an invalid return status!')
 
