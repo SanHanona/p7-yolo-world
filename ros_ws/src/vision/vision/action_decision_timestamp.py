@@ -36,6 +36,8 @@ class ActionDecision(Node):
         # Publisher
         self.publish_command = self.create_publisher(String, '/command/action', 10)
 
+        self.publish_pass_state = self.create_publisher(Bool, '/pass_state', 10)
+
         # State Variables
         self.last_attention_command = None
         self.last_attention_timestamp = None
@@ -53,7 +55,7 @@ class ActionDecision(Node):
         self.last_distance_timestamp = None
 
         self.command_window = 10.0  # Command validity in seconds
-        self.wait_time_after_attention_lost = 3.0  # Wait time before deactivating pass_state
+        self.wait_time_after_attention_lost = 10.0  # Wait time before deactivating pass_state
 
         self.timer = self.create_timer(1, self.timer_callback)
 
@@ -84,7 +86,7 @@ class ActionDecision(Node):
         """Check if the distance is within the stopping range."""
         if self.safety_distance is None or self.last_distance_timestamp is None:
             return False
-        self.get_logger().info(f"Distance check: {self.safety_distance <= 5}")
+        # self.get_logger().info(f"Distance check: {self.safety_distance <= 5}")
         return self.safety_distance <= 5 # change if needed 
 
 
@@ -121,15 +123,19 @@ class ActionDecision(Node):
                 if self.last_attention_timestamp else float('inf')
             )
             self.get_logger().info(f"pass state {self.pass_state} - attention is {attention}")
+            
             if time_since_last_attention > self.wait_time_after_attention_lost:
                 self.pass_state = False
+                self.publish_pass_state.publish(Bool(data=False))
                 self.safety_distance = 1000
                 self.get_logger().info("Pass state deactivated due to attention loss.")
         
         if language == "pass" or gesture == "pass":
+            
             self.pass_command_count += 1
             if self.pass_command_count >= 3:
                 self.pass_state = True
+                self.publish_pass_state.publish(Bool(data=True))
                 self.get_logger().info("Pass state activated.")
         else:
             self.pass_command_count = 0
@@ -151,9 +157,12 @@ class ActionDecision(Node):
             else:
                 self.get_logger().info("No valid commands or conditions met.")
         elif attention == False:
-            # self.stop_action()
-            self.get_logger().info("No Attention.")
-            self.get_attention()
+            if is_close:
+                # self.stop_action()
+                self.get_logger().info("No Attention.")
+                self.get_attention()
+            else:
+                self.get_logger().info(f"Person detected at {self.safety_distance} m")
         # else: 
         #     self.get_logger().info("action handler passive")
 

@@ -54,6 +54,14 @@ class MinimalSubscriber(Node):
             self.distance_callback,
             10)
         
+        self.pass_subscription = self.create_subscription(
+            Bool,
+            '/pass_state',
+            self.pass_state_callback,
+            10)
+        
+        self.pass_state = False
+        
         self.distance = 0
         self.safety_distance_threshold = 5
 
@@ -81,6 +89,8 @@ class MinimalSubscriber(Node):
         self.distance = msg.data
         # self.get_logger().info(f"Distance received: {self.distance}")
 
+    def pass_state_callback(self, msg):
+        self.pass_state = msg.data
 
     def eye_detection(self, img, x, y):
 
@@ -151,7 +161,7 @@ class MinimalSubscriber(Node):
 
                 if self.distance <= self.safety_distance_threshold:
                     eye_detection = self.eye_detection(cv2Image, x, y)
-                    if eye_detection == True:
+                    if (eye_detection == True) or self.pass_state:
                         self.publish_attention.publish(Bool(data=True))
                         self.not_seen=0
                 else:
@@ -175,6 +185,9 @@ class MinimalSubscriber(Node):
         annotated_image = LABEL_ANNOTATOR.annotate(annotated_image, detections)
 
         annotated_image = cv2.resize(annotated_image,(1280,720))
+
+        if self.pass_state:
+            annotated_image = cv2.circle(annotated_image, (40,40), 20, (0,0,255), 40)
 
         # self.get_logger().info("Here it comes...")
 

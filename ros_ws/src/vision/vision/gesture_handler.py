@@ -62,7 +62,7 @@ class Gesture(Node):
     def attention_callback(self, attention):
         # If attention is true, subscribe to the box topic
         if attention.data: 
-            self.get_logger().info("Attention detected")
+            # self.get_logger().info("Attention detected")
             '''self.box_subscriber = self.create_subscription(
                 Int32MultiArray,
                 '/box',
@@ -71,7 +71,7 @@ class Gesture(Node):
             self.gesture_callback()
 
     def gesture_callback(self): 
-        self.get_logger().info("Gesture callback triggered.")
+        # self.get_logger().info("Gesture callback triggered.")
 
         # Process image data
         # image = process_int_array_to_image(box.data)
@@ -85,7 +85,7 @@ class Gesture(Node):
             return 
 
         # Run detection
-        detections = self.run_detection(image, conf=0.2, iou=0.1, threshold=0.1) # tune paramters
+        detections = self.run_detection(image, threshold=0.1) # tune paramters
         detected_classes = detections.data['class_name']  
 
         # Publish and display annotated image
@@ -97,10 +97,10 @@ class Gesture(Node):
             self.get_logger().info(f"Too many gestrures detected")
 
     
-    def run_detection(self, image, conf=0.2, iou=0.1, threshold=0.1):
-        self.get_logger().info("Running gesture detection model.")
+    def run_detection(self, image, threshold=0.1):
+        # self.get_logger().info("Running gesture detection model.")
 
-        results = model.predict(image)
+        results = model.predict(image, conf=0.2)
         detections = sv.Detections.from_ultralytics(results[0]).with_nms(threshold)
         return detections
 
