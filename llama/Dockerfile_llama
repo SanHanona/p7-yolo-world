@@ -1,0 +1,131 @@
+# Use an official PyTorch image with CUDA support as the base image for GPU compatibility
+FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS base
+
+
+# Set environment variables
+ENV FORCE_CUDA="1" \
+    MMCV_WITH_OPS=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+COPY . /llama
+
+WORKDIR /llama
+
+# Install essential packages and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    locales \
+    curl \
+    wget \
+    gnupg2 \
+    lsb-release \
+    -qqy x11-apps \
+    build-essential \
+    python3-pip \
+    python3-dev \
+    python3-wheel \
+    libgl1-mesa-glx \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libglib2.0-0 \
+    git \
+    libopenh264-dev \
+    ffmpeg \
+    portaudio19-dev \
+    alsa-base \
+    pulseaudio \
+    alsa-utils \
+    && locale-gen en_US en_US.UTF-8 \
+    && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base AS ros
+
+# Add the ROS 2 apt repository
+RUN apt-get update && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - \
+    && sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
+
+# Install ROS 2 Humble and other necessary tools
+RUN apt-get update && apt-get install -y \
+    ros-humble-desktop \
+    python3-rosdep \
+    python3-rosinstall \
+    python3-rosinstall-generator \
+    python3-wstool \
+    python3-colcon-common-extensions \
+    python3-vcstool \
+    python3-argcomplete \
+    && rosdep init \
+    && rosdep update \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install additional ROS 2 tools and Isaac Sim ROS 2 packages
+RUN apt-get update && apt-get install -y \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
+    ros-humble-rviz2 \
+    ros-humble-tf2-tools \
+    ros-humble-joint-state-publisher \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM ros AS python_deps
+
+RUN pip3 install --upgrade pip wheel \
+    && pip3 install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121 \
+    && pip3 install \
+        blobfile \
+        whisper \
+        fairscale \
+        fire \
+        jinja2\
+        json-strong-typing \
+        tiktoken \ 
+        pydantic \
+        pydantic_core \
+        Pillow \
+        PyYAML \
+        setuptools \
+        pyaudio \
+        paramiko \
+        SpeechRecognition \
+        --extra-index-url https://download.pytorch.org/whl/cu121 \
+        numpy==1.26.4 
+        # setuptools-rust
+
+FROM python_deps AS llama
+
+# COPY . /llama
+
+# WORKDIR /llama
+
+RUN pip install llama-models
+
+RUN pip install git+https://github.com/openai/whisper.git
+
+# Additional setup for Llama 3.2-3b
+RUN ls && python3 setup.py install
+# RUN pip install .
+
+ENV CHECKPOINT_DIR=../checkpoints/Llama3.2-3B/
+
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ENV FASTRTPS_DEFAULT_PROFILES_FILE=llama_ws/fastdds.xml
+
+# Set up ROS2 environment variables
+SHELL ["/bin/bash", "-c"]
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+RUN cd llama_ws && ls && \
+    apt-get update && apt-get install -y && \
+    rosdep update && \
+    rosdep install -i --from-path src --rosdistro humble -y && \
+    source /opt/ros/humble/setup.bash && \
+    colcon build && \
+    source install/local_setup.bash
+
+# Entrypoint to start the model service or run interactive shell
+# CMD ["bash"]
