@@ -10,7 +10,7 @@ class ActionDecision(Node):
     def __init__(self):
         super().__init__('action_decision')
         self.get_logger().info("Action decision node initialized.")
-
+    
         self.lang_subscription = self.create_subscription(
             String,
             '/command/language',

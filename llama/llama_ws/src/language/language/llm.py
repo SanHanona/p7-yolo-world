@@ -91,7 +91,7 @@ def run_main(
                 # Validate the output
                 if (output in available_functions) or (output.startswith('wait(') and output.endswith(')')):
                     print("Valid output received.")
-                    publish_to_topic("/lang_command", "std_msgs/String", f"data: {output}")
+                    publish_to_topic("/command/language", "std_msgs/String", f"data: {output}")
                     #input = ""
                 else:
                     print("Invalid output, please try again.")

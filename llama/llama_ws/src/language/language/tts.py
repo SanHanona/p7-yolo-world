@@ -23,13 +23,13 @@ class WhisperNode(Node):
         self.phrase_timeout = args.phrase_timeout
 
         # Topics
-        self.subscription = self.create_subscription(Bool, '/attention', self.attention_callback, 10)
+        self.subscription = self.create_subscription(Bool, '/attention', self.attention_callback, 0)
         self.publisher = self.create_publisher(String, '/speech', 10)
 
         # Whisper model and SpeechRecognition
         self.phrase_time = None
         self.data_queue = Queue()
-        self.audio_model = whisper.load_model(self.model_name)
+        self.audio_model = whisper.load_model(self.model_name, device='cpu')
         self.transcription = ['']
 
         # Microphone setup
@@ -125,7 +125,7 @@ class WhisperNode(Node):
 
 def main(args=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="tiny", help="Model to use",
+    parser.add_argument("--model", default="tiny.en", help="Model to use",
                         choices=['tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large'])
     parser.add_argument("--energy_threshold", default=1000,
                         help="Energy level for mic to detect.", type=int)

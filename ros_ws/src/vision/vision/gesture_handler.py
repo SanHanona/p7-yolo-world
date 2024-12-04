@@ -15,7 +15,7 @@ BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator(thickness=2)
 LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=sv.Color.BLACK)
 
 # model = YOLOWorld("../../../../data/hand_gestures_v6i.yolov5pytorch/runs/detect/train10/weights/last.pt") # might need to test the others 
-model = YOLOWorld("/yolo/data/hand_gestures_v6i.yolov5pytorch/runs/detect/train13/weights/last.pt") # might need to test the others 
+model = YOLOWorld("/yolo/data/hand_gestures_v6i.yolov5pytorch/runs/detect/train10/weights/last.pt") # might need to test the others 
 
 classes = ["stop", "Thumbs up"]
 model.set_classes(classes)
