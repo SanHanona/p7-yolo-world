@@ -15,10 +15,10 @@ def generate_launch_description():
             package='vision',
             executable='action_decision',
             name='action_decision'),
-        # launch_ros.actions.Node(
-        #     package='vision',
-        #     executable='gesture_handler',
-        #     name='gesture_handler'),
+        launch_ros.actions.Node(
+            package='vision',
+            executable='gesture_handler',
+            name='gesture_handler'),
         launch_ros.actions.Node(
             package='vision',
             executable='nav_to_pose',
