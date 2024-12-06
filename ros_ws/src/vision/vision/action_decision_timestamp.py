@@ -1,5 +1,7 @@
 import rclpy
 from rclpy.node import Node
+from rcl_interfaces.srv import SetParameters
+from rcl_interfaces.msg import Parameter, ParameterValue
 from std_msgs.msg import Bool, String, Float32
 
 
@@ -37,6 +39,14 @@ class ActionDecision(Node):
         self.publish_command = self.create_publisher(String, '/command/action', 10)
 
         self.publish_pass_state = self.create_publisher(Bool, '/pass_state', 10)
+
+        # Parameter declaration
+        self.cli = self.create_client(SetParameters, '/controller_server/set_parameters')
+        while not self.cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service not available, waiting again...')
+        self.get_logger().info('service aquired!')
+        self.req = SetParameters.Request()
+
 
         # State Variables
         self.last_attention_command = None
@@ -125,7 +135,12 @@ class ActionDecision(Node):
             self.get_logger().info(f"pass state {self.pass_state} - attention is {attention}")
             
             if time_since_last_attention > self.wait_time_after_attention_lost:
+                if self.pass_state:
+                    self.get_logger().info("Option 1")
+                    self.set_max_speed(1.8)
                 self.pass_state = False
+                # param = Parameter('/controller_server FollowPath.max_vel_x', Parameter.Type.DOUBLE, 1.8)
+                # self.set_parameters([param])
                 self.publish_pass_state.publish(Bool(data=False))
                 self.safety_distance = 1000
                 self.get_logger().info("Pass state deactivated due to attention loss.")
@@ -134,7 +149,12 @@ class ActionDecision(Node):
             
             self.pass_command_count += 1
             if self.pass_command_count >= 3:
+                if not self.pass_state:
+                    self.get_logger().info("Option 2")
+                    self.set_max_speed(0.6)
                 self.pass_state = True
+                # param = Parameter('/controller_server FollowPath.max_vel_x', Parameter.Type.DOUBLE, 0.6)
+                # self.set_parameters([param])
                 self.publish_pass_state.publish(Bool(data=True))
                 self.get_logger().info("Pass state activated.")
         else:
@@ -182,6 +202,27 @@ class ActionDecision(Node):
     def pass_action(self):
         self.get_logger().info("Action: Pass.")
         self.publish_command.publish(String(data="pass"))
+
+    def set_max_speed(self, speed):
+        param = Parameter(
+            name='FollowPath.max_vel_x', 
+            value=ParameterValue(
+                type=3,  # Type 3 corresponds to float64
+                double_value=speed
+            )
+        )
+
+        # Create the request and set the parameters
+        request = SetParameters.Request()
+        request.parameters = [param]
+
+        # Send the request and wait for the response
+        future = self.cli.call_async(request)
+        future.add_done_callback(self.set_spd_callback)
+
+    def set_spd_callback(self, msg):
+        self.get_logger().info("Speed changed")
+
 
 def main(args=None):
     rclpy.init(args=args)

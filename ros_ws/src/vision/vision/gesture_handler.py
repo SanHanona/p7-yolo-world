@@ -100,7 +100,7 @@ class Gesture(Node):
     def run_detection(self, image, threshold=0.1):
         # self.get_logger().info("Running gesture detection model.")
 
-        results = model.predict(image, conf=0.2)
+        results = model.predict(image, conf=0.4)
         detections = sv.Detections.from_ultralytics(results[0]).with_nms(threshold)
         return detections
 
