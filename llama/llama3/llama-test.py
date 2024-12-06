@@ -126,7 +126,7 @@ def read_input():
     ssh_client.connect('', username='', password='')
 
     sftp_client = ssh_client.open_sftp()
-    remote_file = sftp_client.open('D:\Bureau\TC\AAU\PBL\PBL_code\whisper_real_time\last_sentence.txt')
+    remote_file = sftp_client.open('whisper_real_time\last_sentence.txt')
     try:
         for line in remote_file:
             return line
