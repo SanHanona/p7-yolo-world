@@ -8,7 +8,7 @@ services:
     privileged: true
     environment:
       - DISPLAY=${DISPLAY}
-      # - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
     devices:
       - /dev/video0:/dev/video0
     volumes:
@@ -19,7 +19,7 @@ services:
       - "8080:8080"
     network_mode: host
     command: tail -f /dev/null  # Keep the container running
-    # command: ["/bin/bash"]
+    # entrypoint: ["/bin/bash", "yolo_entrypoint.sh"]
     # # Add any start command you need here, the above command is just an example.
 
   isaac-sim:
@@ -67,4 +67,6 @@ services:
       - "8080:8080"
     network_mode: host
     command: tail -f /dev/null
+    # entrypoint: ["/bin/bash", "llama_entrypoint.sh"]
+
     # Modify this start command as needed for Isaac Sim.
