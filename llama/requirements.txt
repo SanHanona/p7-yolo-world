@@ -1,0 +1,12 @@
+numpy==1.26.4
+blobfile
+fairscale
+fire
+jinja2
+json-strong-typing
+tiktoken
+torch
+pydantic
+pydantic_core
+pyaudio
+whisper

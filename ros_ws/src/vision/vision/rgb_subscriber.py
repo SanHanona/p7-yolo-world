@@ -26,7 +26,7 @@ LABEL_ANNOTATOR = sv.LabelAnnotator(text_thickness=2, text_scale=1, text_color=s
 # if __detector == "yolo11":
 #     model = YOLO("yolo11s.pt")
 # elif __detector == "yolo-world":
-model = YOLOWorld(model_id="yolo_world/l") 
+model = YOLOWorld(model_id="yolo_world/s") 
 classes = ["person","eyes"]
 model.set_classes(classes)
 

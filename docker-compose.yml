@@ -49,3 +49,22 @@ services:
     network_mode: host
     entrypoint: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && ./runheadless.native.sh"]
     # Modify this start command as needed for Isaac Sim.
+
+  llama:
+    image: llama:latest
+    container_name: llama
+    runtime: nvidia
+    privileged: true
+    environment:
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - PULSE_SERVER=unix:/tmp/pulse_socket
+    devices:
+      - /dev/video0:/dev/video0
+    volumes:
+      - /dev/shm:/dev/shm
+      - /tmp/pulse_socket:/tmp/pulse_socket:ro 
+    ports:
+      - "8080:8080"
+    network_mode: host
+    command: tail -f /dev/null
+    # Modify this start command as needed for Isaac Sim.
