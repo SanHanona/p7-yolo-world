@@ -27,13 +27,23 @@ cd isaac-sim
 ```
 Run the following to build 
 ```bash
-./build.sh
+./build_isaac.sh
 ```
 
 You will be prompted to give a username and password 
 ```bash
 usernam: $oauthtoken
 Pass: ask or create a account and key: https://docs.nvidia.com/ngc/gpu-cloud/ngc-user-guide/index.html#generating-api-key 
+```
+
+### Build Llama and whisper
+Navigate to isaac_sim folder 
+```bash
+cd llama
+```
+Run the following to build 
+```bash
+./build_llama.sh
 ```
 
 ## Run with docker-compose 
@@ -47,9 +57,9 @@ Running the **container from a host** e.g. ssh you might need to run from the ho
 xhost +local:docker
 ```
 
-You can run the Docker containers with docker compose 
+You can run the Docker containers with docker compose - This will execute entrypoints for all containers which starts the system
 
-Run both containers in detached mode as dev container (running in the background)
+Run both containers in detached mode as dev container (running in the background - to not run in background run without '-d')
 ```bash
 docker compose -f docker-compose-dev up -d
 ```
@@ -62,7 +72,7 @@ Verify the containers are runnning:
 docker compose ps
 ```
 
-You should see both containers running 
+You should see all containers running 
 
 ## Inside the Container
 
@@ -82,7 +92,7 @@ python3 yolo_test.py
 ```
 
 # ROS2 
-Both containers have ros2 humble install and should be able to communicate. For trouble-shooting ros2 issues test the containers can communicate. First access both containers in two different terminals. 
+All containers have ros2 humble install and should be able to communicate. For trouble-shooting ros2 issues test the containers can communicate. First access both containers in two different terminals. 
 
 ## navigation demo 
 To run the navigation with rvis: 
@@ -107,23 +117,26 @@ ros2 launch carter_navigation carter_navigation.launch.py
 
 - In a new terminal exec the yolo world 
 ```bash
-docker exec -it yolo-demo /bin/bash
+docker exec -it yolo-demo-dev /bin/bash
 ```
 
-- Source the installs 
+- run the entrypoint
 ```bash
-source ros_ws/install/setup.bash
+./yolo_entrypoint.sh
 ```
 
-- Run navigation and all that 
+- In a new terminal exec the yolo world 
 ```bash
-ros2 launch nav_goal_handler nav_goal_handler.launch.py
+docker exec -it llama-dev /bin/bash
 ```
 
-- Run image subscriber to see yolo detections - new terminal same container 
+- run the entrypoint
 ```bash
-ros2 run P7 JohnsFunciton 
+./llama_entrypoint.sh
 ```
+
+
+
 
 ### debug
 Run a listener and talker 
