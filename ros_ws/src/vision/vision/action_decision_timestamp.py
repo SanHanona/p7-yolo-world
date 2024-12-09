@@ -137,7 +137,7 @@ class ActionDecision(Node):
             if time_since_last_attention > self.wait_time_after_attention_lost:
                 if self.pass_state:
                     self.get_logger().info("Option 1")
-                    self.set_max_speed(1.8)
+                    self.set_max_speed(1.8, 1)
                 self.pass_state = False
                 # param = Parameter('/controller_server FollowPath.max_vel_x', Parameter.Type.DOUBLE, 1.8)
                 # self.set_parameters([param])
@@ -151,7 +151,7 @@ class ActionDecision(Node):
             if self.pass_command_count >= 3:
                 if not self.pass_state:
                     self.get_logger().info("Option 2")
-                    self.set_max_speed(0.6)
+                    self.set_max_speed(0.3, 0.25)
                 self.pass_state = True
                 # param = Parameter('/controller_server FollowPath.max_vel_x', Parameter.Type.DOUBLE, 0.6)
                 # self.set_parameters([param])
@@ -203,7 +203,7 @@ class ActionDecision(Node):
         self.get_logger().info("Action: Pass.")
         self.publish_command.publish(String(data="pass"))
 
-    def set_max_speed(self, speed):
+    def set_max_speed(self, speed, theta):
         param = Parameter(
             name='FollowPath.max_vel_x', 
             value=ParameterValue(
@@ -211,10 +211,17 @@ class ActionDecision(Node):
                 double_value=speed
             )
         )
+        param2 = Parameter(
+            name='FollowPath.max_vel_theta', 
+            value=ParameterValue(
+                type=3,  # Type 3 corresponds to float64
+                double_value=theta
+            )
+        )
 
         # Create the request and set the parameters
         request = SetParameters.Request()
-        request.parameters = [param]
+        request.parameters = [param, param2]
 
         # Send the request and wait for the response
         future = self.cli.call_async(request)

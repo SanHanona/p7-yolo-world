@@ -13,7 +13,6 @@ Basic navigation demo to go to pose.
 class Commander(Node):
     def __init__(self):
         super().__init__('commander')
-        self.get_logger().info("Commander node initialized.")
 
         # Subscribtion to the action command topic for, well... commands
         self.depth_subscription = self.create_subscription(
@@ -34,36 +33,71 @@ class Commander(Node):
         # Variable for swithcing between the goals
         self.goalnr = 0
 
-        # Set our initial pose
+        self.map = "Hospital"
+
         self.initial_pose = PoseStamped()
-        self.initial_pose.header.frame_id = 'map'
-        self.initial_pose.header.stamp = self.navigator.get_clock().now().to_msg()
-        self.initial_pose.pose.position.x = -6.0
-        self.initial_pose.pose.position.y = 0.0
-        self.initial_pose.pose.orientation.z = 3.1415
-        self.initial_pose.pose.orientation.w = 1.0
-        self.navigator.setInitialPose(self.initial_pose)
-
-        # Wait for navigation to fully activate
-        self.navigator.waitUntilNav2Active()
-
-        # Set our first goal pose
         self.goal1_pose = PoseStamped()
-        self.goal1_pose.header.frame_id = 'map'
-        self.goal1_pose.header.stamp = self.navigator.get_clock().now().to_msg()
-        self.goal1_pose.pose.position.x = 0.0
-        self.goal1_pose.pose.position.y = 15.0
-        self.goal1_pose.pose.orientation.w = 1.0
-        self.goal1_pose.pose.orientation.z = 0.0
-
-        # Set our second goal pose
         self.goal2_pose = PoseStamped()
-        self.goal2_pose.header.frame_id = 'map'
-        self.goal2_pose.header.stamp = self.navigator.get_clock().now().to_msg()
-        self.goal2_pose.pose.position.x = 0.0
-        self.goal2_pose.pose.position.y = -9.0
-        self.goal2_pose.pose.orientation.w = 1.0
-        self.goal2_pose.pose.orientation.z = 0.0
+
+        if self.map == "Warehouse":
+            # Set our initial pose
+            self.initial_pose.header.frame_id = 'map'
+            self.initial_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+            self.initial_pose.pose.position.x = -6.0
+            self.initial_pose.pose.position.y = 0.0
+            self.initial_pose.pose.orientation.z = 3.1415
+            self.initial_pose.pose.orientation.w = 1.0
+            self.navigator.setInitialPose(self.initial_pose)
+
+            # Wait for navigation to fully activate
+            self.navigator.waitUntilNav2Active()
+
+            # Set our first goal pose
+            self.goal1_pose.header.frame_id = 'map'
+            self.goal1_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+            self.goal1_pose.pose.position.x = 0.0
+            self.goal1_pose.pose.position.y = 15.0
+            self.goal1_pose.pose.orientation.w = 1.0
+            self.goal1_pose.pose.orientation.z = 0.0
+
+            # Set our second goal pose
+            self.goal2_pose.header.frame_id = 'map'
+            self.goal2_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+            self.goal2_pose.pose.position.x = 0.0
+            self.goal2_pose.pose.position.y = -9.0
+            self.goal2_pose.pose.orientation.w = 1.0
+            self.goal2_pose.pose.orientation.z = 0.0
+        
+        if self.map == "Hospital":
+            # Set our initial pose
+            self.initial_pose.header.frame_id = 'map'
+            self.initial_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+            self.initial_pose.pose.position.x = 8.0
+            self.initial_pose.pose.position.y = 6.0
+            self.initial_pose.pose.orientation.z = 3.1415
+            self.initial_pose.pose.orientation.w = 1.0
+            self.navigator.setInitialPose(self.initial_pose)
+
+            # Wait for navigation to fully activate
+            self.navigator.waitUntilNav2Active()
+
+            # Set our first goal pose
+            self.goal1_pose.header.frame_id = 'map'
+            self.goal1_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+            self.goal1_pose.pose.position.x = 5.0
+            self.goal1_pose.pose.position.y = 10.5
+            self.goal1_pose.pose.orientation.w = 1.0
+            self.goal1_pose.pose.orientation.z = 1.57
+
+            # Set our second goal pose
+            self.goal2_pose.header.frame_id = 'map'
+            self.goal2_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+            self.goal2_pose.pose.position.x = -25.0
+            self.goal2_pose.pose.position.y = 10.5
+            self.goal2_pose.pose.orientation.w = 1.0
+            self.goal2_pose.pose.orientation.z = -1.57
+        
+        self.get_logger().info("Commander node initialized, using map: " + self.map)
 
     # Runs whenever a commnad is published
     def action_callback(self, msg):
