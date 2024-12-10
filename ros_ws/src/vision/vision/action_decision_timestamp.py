@@ -137,7 +137,7 @@ class ActionDecision(Node):
             if time_since_last_attention > self.wait_time_after_attention_lost:
                 if self.pass_state:
                     self.get_logger().info("Option 1")
-                    self.set_max_speed(1.8, 1)
+                    self.set_max_speed(1.8, 1.0)
                 self.pass_state = False
                 # param = Parameter('/controller_server FollowPath.max_vel_x', Parameter.Type.DOUBLE, 1.8)
                 # self.set_parameters([param])
