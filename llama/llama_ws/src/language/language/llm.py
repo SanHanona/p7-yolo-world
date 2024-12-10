@@ -27,7 +27,7 @@ def run_main(
         model_parallel_size=model_parallel_size,
     )
 
-    available_functions = ['wait(t)', 'find_new_way()', 'pass()', 'stop()']
+    available_functions = ['wait(t)', 'pass()', 'stop()', 'error()']
     
     # Start interactive loop
     print("Interactive mode. Type 'exit' to quit.")
@@ -47,8 +47,8 @@ def run_main(
                     <|end_of_text|>
                     
                 Example 2:
-                    Input: 'no, you cannot go this way' 
-                    Output: 'find_new_way()'
+                    Input: '' 
+                    Output: 'error()'
                     <|end_of_text|>
                     
                 Example 3:

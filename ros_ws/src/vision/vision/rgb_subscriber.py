@@ -112,7 +112,7 @@ class MinimalSubscriber(Node):
 
         # detections = sv.Detections.from_inference(sub_results[0]).with_nms(threshold=0.05)
 
-        sub_results = model.infer(sub_image, confidence=0.001)
+        sub_results = model.infer(sub_image, confidence=0.002)
         detections = sv.Detections.from_inference(sub_results).with_nms(threshold=0.05)
 
         sub_image = BOUNDING_BOX_ANNOTATOR.annotate(sub_image, detections)
