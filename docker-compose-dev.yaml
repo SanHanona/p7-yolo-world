@@ -23,8 +23,8 @@ services:
       - "8080:8080"
       - "9229:9229"  # Additional port for debugging, if needed
     network_mode: host
-    command: tail -f /dev/null  # Keep the container running
-    # entrypoint: ["/bin/bash", "yolo_entrypoint.sh"]
+    # command: tail -f /dev/null  #  Keep the container running
+    entrypoint: ["/bin/bash", "yolo_entrypoint.sh"]
 
     # command: ["/bin/bash"]
     # # Add any start command you need here, the above command is just an example.

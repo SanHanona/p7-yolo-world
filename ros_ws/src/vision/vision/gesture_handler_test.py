@@ -6,6 +6,7 @@ from std_msgs.msg import Bool, Int32MultiArray, String
 
 import cv2
 import numpy as np
+import logging
 
 import supervision as sv
 from ultralytics import YOLOWorld
@@ -19,6 +20,8 @@ model = YOLOWorld("/yolo/data/hand_gestures_v6i.yolov5pytorch/runs/detect/train1
 
 classes = ["stop", "Thumbs up"]
 model.set_classes(classes)
+
+logger = logging.getLogger("GestureHandling")
 
 
 class Gesture(Node):
@@ -95,7 +98,6 @@ class Gesture(Node):
                 self.display_annotated_image(image, detections)
         except:
             self.get_logger().info(f"Too many gestrures detected")
-            print(f"Too many gestrures detected")
 
     
     def run_detection(self, image, threshold=0.1):
@@ -117,7 +119,6 @@ class Gesture(Node):
         if self.detection_counter >= self.stability_threshold: #and detected_gesture != self.last_published_gesture:
             # self.last_published_gesture = detected_gesture
             self.gesture_publisher.publish(String(data=detected_gesture))
-            print(f"Gesture detected - publishing: {detected_gesture}")
             self.get_logger().info(f"Gesture detected - publishing: {detected_gesture}")
 
 
@@ -135,6 +136,7 @@ class Gesture(Node):
 
 def main(args=None):
     rclpy.init(args=args)
+
 
     gesture_publisher = Gesture()
     rclpy.spin(gesture_publisher)

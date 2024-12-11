@@ -1,5 +1,11 @@
-#!/bin/bash
 cd ros_ws/
 colcon build
-source install/setup.bash
-ros2 launch vision vision_launch.py
+source /opt/ros/humble/setup.bash
+source install/local_setup.bash
+cd ..
+ros2 run vision gesture_handler
+
+# ros2 run vision gesture_handler_test
+# ros2 launch vision vision_launch.py &
+# ros2 launch carter_navigation hospital_navigation.launch.py &
+# wait
