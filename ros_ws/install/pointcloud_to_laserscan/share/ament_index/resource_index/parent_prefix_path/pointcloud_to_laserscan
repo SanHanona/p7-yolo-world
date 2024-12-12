@@ -1,1 +1,1 @@
-/yolo/ros_ws/install/nav_commander:/yolo/ros_ws/install/nav2_simple_commander:/yolo/ros_ws/install/vision:/yolo/ros_ws/install/video_subscriber:/yolo/ros_ws/install/pointcloud_to_laserscan:/yolo/ros_ws/install/nav2_social_costmap_plugin:/yolo/ros_ws/install/people_msgs:/yolo/ros_ws/install/nav_goal_handler:/yolo/ros_ws/install/carter_navigation:/yolo/ros_ws/install/P7:/opt/ros/humble
+/opt/ros/humble

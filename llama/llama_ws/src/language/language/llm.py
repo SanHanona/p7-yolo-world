@@ -34,8 +34,10 @@ def run_main(
     while True:
         print("start")
         # Read the input (you can use the remote file reading function if needed)
-        input = listen_to_topic("/speech")  # Alternatively, use input() for direct user input
+        # input = listen_to_topic("/speech")  # Alternatively, use input() for direct user input
         
+        input = "yes you can"
+
         if input != "":
             # The prompt includes the context and expected function outputs
             prompts = [
