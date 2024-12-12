@@ -29,6 +29,7 @@ setup(
             'depth_subscriber = vision.depth_subscriber:main',
             'action_decision = vision.action_decision_timestamp:main', 
             'gesture_handler = vision.gesture_handler:main',
+            'gesture_handler_test = vision.gesture_handler_test_matrix:main',
             'nav_to_pose = vision.nav_to_pose:main'
         ],
     },
