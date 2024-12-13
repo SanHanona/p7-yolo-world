@@ -27,15 +27,16 @@ def run_main(
         model_parallel_size=model_parallel_size,
     )
 
-    available_functions = ['wait(t)', 'find_new_way()', 'pass()', 'stop()']
+    available_functions = ['wait(t)', 'pass()', 'stop(), error()']
     
     # Start interactive loop
     print("Interactive mode. Type 'exit' to quit.")
-    while True:
+    for x in range(10):
         print("start")
         # Read the input (you can use the remote file reading function if needed)
-        input = listen_to_topic("/speech")  # Alternatively, use input() for direct user input
-        
+        #input = listen_to_topic("/speech")  # Alternatively, use input() for direct user input
+        input = "redtfygbhn" #. .
+
         if input != "":
             # The prompt includes the context and expected function outputs
             prompts = [
@@ -47,18 +48,23 @@ def run_main(
                     <|end_of_text|>
                     
                 Example 2:
-                    Input: 'no, you cannot go this way' 
-                    Output: 'find_new_way()'
+                    Input: 'You have to stop.' 
+                    Output: 'stop()'
                     <|end_of_text|>
                     
                 Example 3:
                     Input: 'hi robot, can you wait a few minutes please?' 
                     Output: 'wait(300)'
                     <|end_of_text|>
+
+                Example 4:
+                    Input: '' 
+                    Output: 'error()'
+                    <|end_of_text|>
                 
                 Task:
-                Input: '""" + input + """'
-                Output:"""
+                    Input: '""" + input + """'
+                    Output:"""
             ]
 
             # Process the prompt and generate response
@@ -91,7 +97,7 @@ def run_main(
                 # Validate the output
                 if (output in available_functions) or (output.startswith('wait(') and output.endswith(')')):
                     print("Valid output received.")
-                    publish_to_topic("/lang_command", "std_msgs/String", f"data: {output}")
+                    #publish_to_topic("/lang_command", "std_msgs/String", f"data: {output}")
                     #input = ""
                 else:
                     print("Invalid output, please try again.")
